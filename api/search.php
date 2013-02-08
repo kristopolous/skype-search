@@ -3,7 +3,7 @@ $db = new SQLite3("main.db");
 if(!empty($_GET['q'])) {
   $query = mysql_real_escape_string($_GET['q']);
 
-  $qres = $db->query("select id, convo_id, timestamp, from_dispname, chatname, body_xml from Messages where body_xml like '%${query}%' order by timestamp desc");
+  $qres = $db->query("select id, convo_id, timestamp, from_dispname, chatname, body_xml from Messages where body_xml like '%${query}%' order by timestamp desc limit 1000");
 } else {
 
   $ts = mysql_real_escape_string($_GET['ts']);
