@@ -4,7 +4,7 @@ Just put this little thing on a server my friend.
 
 Here's a screen shot:
 
-<img src=http://i.imgur.com/LuyrWd8.png>
+<img src=http://i.imgur.com/cIHy9gb.png>
 
 If you click on a timestamp then you get all messages +/- a 5 minute window around the search context within the search room.
 
