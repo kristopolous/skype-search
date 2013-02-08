@@ -13,3 +13,5 @@ All you have to do is find a file called main.db, it's in your .Skype/username/ 
 If you wanted to be smarter, you could do something like a hardlink or a symlink instead of a copy to make this always update.  But who would ever be that clever?
 
 Certainly not I.  Have fun.
+
+Oh yeah, I only show the first *ONE THOUSAND* results; to try to save your browser from locking up due to some bad query.
