@@ -1,24 +1,58 @@
-var template;
+var template, template_expanded, re, query;
 $(document).ready(function(){
   template = _.template($("#Search-Result").html());
-
+  template_expanded = _.template($("#Search-Expanded-Result").html());
 });
+
+function Expand(ts, convo, el) {
+  $.getJSON("api/search.php?ts=" + ts + "&convo=" + convo, function(data) {
+    var parent = el.parentNode.parentNode, rowDOM;
+    $(parent).empty();
+
+    _.each(data, function(row) {
+      process(row);
+      rowDOM = $("<div class='row'>").html( template_expanded(row) );
+      if(row.rawtimestamp == ts) {
+        rowDOM.addClass("highlight");
+      }
+      rowDOM.appendTo(parent);
+    });
+  });
+}
+
+function process(row) {
+  row.body_xml = row.body_xml
+    .replace(/\ \ /g, '&nbsp; ')
+    .replace(/\n/g, "<br>")
+    .replace(re, '<b>$1</b>');
+
+  row.rawtimestamp = row.timestamp;
+  row.timestamp = (new Date(row.timestamp * 1000)).toLocaleString().split(' ').slice(1,-1).join(' ').replace(/GMT.*/, '');
+}
+
 function doSearch(){
-  var query = $("#search").val(),
-    re = new RegExp("(" + query + ")", 'ig');
+  query = $("#search").val();
+  window.location.hash = query;
+
+  re = new RegExp("(" + query + ")", 'ig');
 
   $("#search-text").html("Searching for " + query);
   $.getJSON("api/search.php?q=" + escape(query), function(data) {
     $("#results").empty();
-    _.each(data, function(row) {
-      row.body_xml = row.body_xml
-        .replace(/\ \ /g, '&nbsp; ')
-        .replace(/\n/g, "<br>")
-        .replace(re, '<b>$1</b>');
-
-      row.timestamp = (new Date(row.timestamp * 1000)).toLocaleString().split(' ').slice(1,-1).join(' ').replace(/GMT.*/, '');
-
-      $("<div class='row result'>").html( template(row) ).appendTo("#results");
-    });
+    if(data.length) {
+      _.each(data, function(row) {
+        process(row);
+        $("<div class='row result'>").html( template(row) ).appendTo("#results");
+      });
+    } else {
+      $("#results").html("<h2>Woops, nothing found for '" + query + "'. Check the spelling?</h2>");
+    }
   })
 }
+
+setInterval(function(){
+  if(window.location.hash.slice(1) != query) {
+    $("#search").val(window.location.hash.slice(1));
+    doSearch();
+  }
+}, 100);

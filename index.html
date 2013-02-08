@@ -13,9 +13,18 @@
       body {
         padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
       }
-      .row {
+      a { cursor: pointer }
+      .result {
         border-top: 1px solid #a9a;
         padding: 1em 0;
+      }
+      .row > .row {
+        margin-left: 0;
+      }
+      .highlight {
+        background: rgb(250,250,180);
+        text-shadow: 0 1px gold;
+        border-radius: 12px;
       }
     </style>
     <link href="css/bootstrap-responsive.css" rel="stylesheet">
@@ -59,8 +68,13 @@
 
     </div> <!-- /container -->
 
-    <script type="text/template" id="Search-Result">
+    <script type="text/template" id="Search-Expanded-Result">
       <div class="span2 timestamp"><%= timestamp %></div>
+      <div class="span2 author"><%= from_dispname %></div>
+      <div class="span8 text"><%= body_xml %></div>
+    </script>
+    <script type="text/template" id="Search-Result">
+      <div class="span2 timestamp"><a onclick="Expand(<%= rawtimestamp %>, <%= convo_id %>, this)"><%= timestamp %></a></div>
       <div class="span2 author"><%= from_dispname %></div>
       <div class="span8 text"><%= body_xml %></div>
     </script>
