@@ -1,4 +1,4 @@
-# Doesn't skype search suck major donkey balls?
+# Skype search is painful. Let's do better.
 
 Here's what you can do about it.  Just put this little thing on a server my friend.
 
