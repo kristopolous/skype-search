@@ -6,17 +6,28 @@ $(document).ready(function(){
 
 function Expand(ts, convo, el) {
   $.getJSON("api/search.php?ts=" + ts + "&convo=" + convo, function(data) {
-    var parent = el.parentNode.parentNode, rowDOM;
-    $(parent).empty();
+    var rowDOM;
+
+    $(el)
+      .empty()
+      .removeClass('highlight')
+      .unbind('click')
+      .hide();
 
     _.each(data, function(row) {
       process(row);
       rowDOM = $("<div class='row'>").html( template_expanded(row) );
       if(row.rawtimestamp == ts) {
-        rowDOM.addClass("highlight");
+        rowDOM.addClass("highlight").click(function(){
+          $(this.parentNode).slideUp(function(){
+            $(this).toggleClass("off").slideDown();
+          });
+        });
       }
-      rowDOM.appendTo(parent);
+      rowDOM.appendTo(el);
     });
+
+   $(el).slideDown();
   });
 }
 
@@ -42,7 +53,9 @@ function doSearch(){
     if(data.length) {
       _.each(data, function(row) {
         process(row);
-        $("<div class='row result'>").html( template(row) ).appendTo("#results");
+        $("<div class='row result highlight'>").html( template(row) ).on('click', function(){
+          Expand(row.rawtimestamp, row.convo_id, this);
+        }).appendTo("#results");
       });
     } else {
       $("#results").html("<h2>Woops, nothing found for '" + query + "'. Check the spelling?</h2>");
