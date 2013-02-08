@@ -1,7 +1,6 @@
-var template, template_expanded, re, query;
+var template, re, query;
 $(document).ready(function(){
   template = _.template($("#Search-Result").html());
-  template_expanded = _.template($("#Search-Expanded-Result").html());
 });
 
 function Expand(ts, convo, el) {
@@ -16,7 +15,7 @@ function Expand(ts, convo, el) {
 
     _.each(data, function(row) {
       process(row);
-      rowDOM = $("<div class='row'>").html( template_expanded(row) );
+      rowDOM = $("<div class='row'>").html( template(row) );
       if(row.rawtimestamp == ts) {
         rowDOM.addClass("highlight").click(function(){
           $(this.parentNode).slideUp(function(){
