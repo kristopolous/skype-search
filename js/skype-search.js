@@ -8,7 +8,7 @@ function doSearch(){
     re = new RegExp("(" + query + ")", 'ig');
 
   $("#search-text").html("Searching for " + query);
-  $.getJSON("api/search.php?q=" + query, function(data) {
+  $.getJSON("api/search.php?q=" + escape(query), function(data) {
     $("#results").empty();
     _.each(data, function(row) {
       row.body_xml = row.body_xml
