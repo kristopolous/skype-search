@@ -6,7 +6,7 @@ Here's a screen shot:
 
 <img src=http://i.imgur.com/cIHy9gb.png>
 
-If you click on a timestamp then you get all messages +/- a 5 minute window around the search context within the search room.
+If you click on a timestamp then you get all messages +/- a 13 message window around the search context within the search room.
 
 All you have to do is find a file called main.db, it's in your .Skype/username/ directory.  Now take a COPY (don't move it you fool) and drop it into the api directory.  Host this locally, unless you want the world to search your databases.
 
