@@ -14,6 +14,7 @@ function Expand(ts, convo, el) {
       .hide();
 
     _.each(data, function(row) {
+      if(!row) { return; }
       process(row);
       rowDOM = $("<div class='row'>").html( template(row) );
       if(row.rawtimestamp == ts) {
@@ -51,6 +52,7 @@ function doSearch(){
     $("#results").empty();
     if(data.length) {
       _.each(data, function(row) {
+        if(!row) { return; }
         process(row);
         $("<div class='row result highlight'>").html( template(row) ).on('click', function(){
           Expand(row.rawtimestamp, row.convo_id, this);
