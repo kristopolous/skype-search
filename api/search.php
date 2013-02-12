@@ -25,8 +25,10 @@ function prune($obj) {
 }
 
 if(!empty($_GET['q'])) {
-  $query = mysql_real_escape_string($_GET['q']);
-  $qres = $db->query("$pre where body_xml like '%${query}%' order by timestamp desc limit 1000");
+  // search works better when it's an and clause really as opposed to contiguous words.
+  // at least that's how I work... 
+  $queryList = explode(' ', mysql_real_escape_string($_GET['q']));
+  $qres = $db->query("$pre where body_xml like '%" . implode("%' and body_xml like '%", $queryList) . "%' order by timestamp desc limit 1000");
   while(($res[] = prune($qres)) != null);
 } else {
 
