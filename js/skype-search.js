@@ -1,7 +1,49 @@
-var template, re, query;
+var template = {}, 
+    re, 
+    query;
+
 $(document).ready(function(){
-  template = _.template($("#Search-Result").html());
+  template.search = _.template($("#Search-Result").html());
+  template.call = _.template($("#Call-Result").html());
 });
+
+function doDuration(num) {
+  if(!num) { return false }
+  var res = [];
+  for(var i = 0; i < 3; i++) {
+    res.push((100 + (num % 60)).toString().slice(1));
+    num = Math.floor(num / 60);
+  }
+  return res.reverse().join(':');
+}
+
+function showCalls() {
+  $.getJSON("api/calls.php", function(data) {
+    $("#results").empty();
+    if(!data.length) {
+      return;
+    }
+    _.each(data, function(row) {
+      if(!row) { return; }
+
+      row.duration = doDuration(row.duration);
+      if(!row.duration) { return; }
+
+      row.begin_timestamp = (new Date(row.begin_timestamp * 1000)).toLocaleString().split(' ').slice(1,-1)
+      row.begin_timestamp.splice(2, 1);
+      row.begin_timestamp = row.begin_timestamp.join(' ').replace(/GMT.*/, '');
+
+      row.current_video_audience = row.current_video_audience.replace(/^\s+/, '').replace(/\s+$/, '');
+
+      row.current_video_audience = '<span>' + row.current_video_audience.split(' ').sort().join('</span><span>') + '</span>';
+
+      $("<div class='row call'>")
+        .html( template.call(row) )
+        .appendTo("#results");
+
+     });
+  });
+}
 
 function Expand(ts, convo, el) {
   $.getJSON("api/search.php?ts=" + ts + "&convo=" + convo, function(data) {
@@ -16,7 +58,7 @@ function Expand(ts, convo, el) {
     _.each(data, function(row) {
       if(!row) { return; }
       process(row);
-      rowDOM = $("<div class='row'>").html( template(row) );
+      rowDOM = $("<div class='row'>").html( template.search(row) );
       if(row.rawtimestamp == ts) {
         rowDOM.addClass("highlight").click(function(){
           $(this.parentNode).slideUp(function(){
@@ -54,7 +96,7 @@ function doSearch(){
       _.each(data, function(row) {
         if(!row) { return; }
         process(row);
-        $("<div class='row result highlight'>").html( template(row) ).on('click', function(){
+        $("<div class='row result highlight'>").html( template.search(row) ).on('click', function(){
           Expand(row.rawtimestamp, row.convo_id, this);
         }).appendTo("#results");
       });

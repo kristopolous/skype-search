@@ -17,6 +17,13 @@
        padding-top: 300px;
       }
       a { cursor: pointer }
+      .members span {
+        background:#434;
+        color:#ede;
+        padding:0.5em;
+        margin:0.15em;
+        width:8em
+      }
       .result {
         border-top: 1px solid #a9a;
         margin: 1em 0;
@@ -29,6 +36,26 @@
       .off .highlight {
         background: none;
       }
+      .call span{ 
+        display:inline-block;
+        padding:0.5em;
+        margin:0.25em;
+        vertical-align: middle;
+      }
+      .call .timestamp,
+      .call .duration { font-weight: bold;
+        font-size:1.25em;
+      }
+      .call .timestamp {
+        text-align:center;
+        font-weight:normal;
+        font-size:1.15em;
+      }
+      .call { 
+        vertical-align: middle;
+        margin: 0.25em 0;
+        border-bottom: 1px solid #434 }
+
       .highlight {
         cursor: pointer;
         background: rgba(250,250,160, 0.5);
@@ -71,6 +98,7 @@
           </form>
           <ul class="nav">
             <li><a id="search-text"></a></li>
+            <li><button onclick="showCalls()" class='btn'>Show Calls</button></a></li>
           </ul>
         </div>
       </div>
@@ -82,6 +110,12 @@
     </div> <!-- /container -->
 
     <div id=copy>done by chris.mckenzie. <a href=https://github.com/kristopolous/skype-search>latest version</a></div>
+
+    <script type="text/template" id="Call-Result">
+      <div class="span1 timestamp"><span><%= begin_timestamp %></span></div>
+        <div class="span1 duration"><span><%= duration %></span></div>
+      <div class="span7 members"><%= current_video_audience %></div>
+    </script>
 
     <script type="text/template" id="Search-Result">
       <div class="span2 timestamp"><%= timestamp %></div>
