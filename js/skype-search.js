@@ -76,8 +76,14 @@ function getName(){
   var cName = value.replace(/[^\w]/g,'');
 
   $(this).addClass('user-' + cName).hover(
-    function() { $(".user-" + cName).addClass('hover'); },
-    function() { $(".user-" + cName).removeClass('hover'); }
+    function() { 
+      $(".user-" + cName).addClass('hover'); 
+      $(".user-" + cName).parent().parent().addClass('hover'); 
+    },
+    function() { 
+      $(".user-" + cName).removeClass('hover'); 
+      $(".user-" + cName).parent().parent().removeClass('hover'); 
+    }
  );
 }
 
@@ -95,7 +101,13 @@ function showCalls() {
 
       row.begin_timestamp = (new Date(row.begin_timestamp * 1000)).toLocaleString().split(' ').slice(1,-1)
       row.begin_timestamp.splice(2, 1);
-      row.begin_timestamp = row.begin_timestamp.join(' ').replace(/GMT.*/, '');
+      row.begin_timestamp = row.begin_timestamp.join(' ').replace(/GMT.*/, '').replace(/\s$/,'');
+      var temp = row.begin_timestamp.split(' '),
+          time = temp.pop(),
+          hour = time.split(':').shift();
+
+      temp.push("<u class='time-" + hour + "'>" + time + "</u>");
+      row.begin_timestamp = temp.join(' ');
 
       row.current_video_audience = row.current_video_audience.replace(/^\s+/, '').replace(/\s+$/, '');
 
@@ -106,6 +118,13 @@ function showCalls() {
         .appendTo("#results");
 
      });
+     for(var hour = 0; hour < 24; hour++) {
+       $(".time-" + (100 + hour).toString().slice(1)).hover(
+         function(){ $("." + this.className).parent().parent().parent().addClass('hover') },
+         function(){ $("." + this.className).parent().parent().parent().removeClass('hover') }
+       );
+     }
+
      $(".members span").each(getName);
   });
 }
