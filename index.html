@@ -20,9 +20,10 @@
       .members span {
         background:#434;
         color:#ede;
+        white-space: pre;
         padding:0.5em;
         margin:0.15em;
-        width:8em
+        width:9em
       }
       .result {
         border-top: 1px solid #a9a;
@@ -114,7 +115,7 @@
     <script type="text/template" id="Call-Result">
       <div class="span1 timestamp"><span><%= begin_timestamp %></span></div>
         <div class="span1 duration"><span><%= duration %></span></div>
-      <div class="span7 members"><%= current_video_audience %></div>
+      <div class="span8 members"><%= current_video_audience %></div>
     </script>
 
     <script type="text/template" id="Search-Result">

@@ -17,6 +17,22 @@ function doDuration(num) {
   return res.reverse().join(':');
 }
 
+var nameMap = {};
+$(function(){
+  $.getJSON("api/whois.php", function(data) {
+    _.each(data, function(value, key) {
+      nameMap[value.skypename] = value.fullname;
+    });
+  });
+});
+
+function getName(){
+  var value = this.innerHTML;
+  if(nameMap[value]) {
+    this.innerHTML = nameMap[value];
+  }
+}
+
 function showCalls() {
   $.getJSON("api/calls.php", function(data) {
     $("#results").empty();
@@ -35,13 +51,14 @@ function showCalls() {
 
       row.current_video_audience = row.current_video_audience.replace(/^\s+/, '').replace(/\s+$/, '');
 
-      row.current_video_audience = '<span>' + row.current_video_audience.split(' ').sort().join('</span><span>') + '</span>';
+      row.current_video_audience = '<span>' + row.current_video_audience.split(/\s+/).sort().join('</span><span>') + '</span>';
 
       $("<div class='row call'>")
         .html( template.call(row) )
         .appendTo("#results");
 
      });
+     $(".members span").each(getName);
   });
 }
 
