@@ -17,6 +17,14 @@
        text-align:center;
        padding-top: 900px;
       }
+      small { display: block;
+        font-weight:normal;
+        white-space:nowrap;
+        text-indent: 0.15em;
+        color: #888;
+        font-family: monospace;
+
+      }
       a { cursor: pointer }
       .members span {
         background:#434;
@@ -131,7 +139,7 @@
 
     <script type="text/template" id="Call-Result">
       <div class="span1 timestamp"><span><%= begin_timestamp %></span></div>
-      <div class="span1 duration"><span><%= duration %></span></div>
+      <div class="span1 duration"><span><%=duration %><small><%= fractional_duration %> hr</small></span></div>
       <div class="span8 members"><%= current_video_audience %></div>
     </script>
 

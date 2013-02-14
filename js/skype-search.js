@@ -17,6 +17,10 @@ function doDuration(num) {
   return res.reverse().join(':');
 }
 
+function doFractionalDuration(num) {
+  return (num / 3600).toFixed(3);
+}
+
 var 
   nameMap = {},
   colorMap = {};
@@ -96,8 +100,11 @@ function showCalls() {
     _.each(data, function(row) {
       if(!row) { return; }
 
+      row.duration_real = row.duration;
       row.duration = doDuration(row.duration);
       if(!row.duration) { return; }
+
+      row.fractional_duration = doFractionalDuration(row.duration_real);
 
       row.begin_timestamp = (new Date(row.begin_timestamp * 1000)).toLocaleString().split(' ').slice(1,-1)
       row.begin_timestamp.splice(2, 1);
