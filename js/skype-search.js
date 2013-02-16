@@ -22,6 +22,7 @@ function doFractionalDuration(num) {
 }
 
 var 
+  convo = DB(),
   nameMap = {},
   colorMap = {};
 
@@ -62,6 +63,9 @@ $(function(){
     return 'rgb(' + mycolor.join(',') + ')';
   }
 
+  $.getJSON("api/conversations.php", function(data) {
+    convo.insert(data);
+  });
   $.getJSON("api/whois.php", function(data) {
     _.each(data, function(value, key) {
       nameMap[value.skypename] = value.fullname;
