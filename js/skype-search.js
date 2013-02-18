@@ -22,7 +22,7 @@ function doFractionalDuration(num) {
 }
 
 var 
-  convo = DB(),
+  convodb = DB(),
   nameMap = {},
   colorMap = {};
 
@@ -44,27 +44,30 @@ function hsv2rgb(h, s, v) {
         case 5: return [v, p, q];
     }
 }
-$(function(){
-  var h = 0, s = 0.3, v = 0.2;
-  function nextColor() {
-    v += 0.035;
-    h += 0.06;
-    if(v >= 0.5) {
-      v = 0.1;
-    }
-    if(h >= 1) {
-      h = 0;
-    }
-    var mycolor = hsv2rgb(h, s, v);
-    mycolor[0] *= 256;
-    mycolor[1] *= 256;
-    mycolor[2] *= 256;
-    mycolor = _.map(mycolor, Math.floor);
-    return 'rgb(' + mycolor.join(',') + ')';
+var h = 0, s = 0.3, v = 0.2;
+function nextColor() {
+  v += 0.035;
+  h += 0.06;
+  if(v >= 0.5) {
+    v = 0.1;
   }
+  if(h >= 1) {
+    h = 0;
+  }
+  var mycolor = hsv2rgb(h, s, v);
+  mycolor[0] *= 256;
+  mycolor[1] *= 256;
+  mycolor[2] *= 256;
+  mycolor = _.map(mycolor, Math.floor);
+  return 'rgb(' + mycolor.join(',') + ')';
+}
 
+$(function(){
   $.getJSON("api/conversations.php", function(data) {
-    convo.insert(data);
+    _.each(data,function(what) {
+      colorMap[what.id] = nextColor();
+    });
+    convodb.insert(data);
   });
   $.getJSON("api/whois.php", function(data) {
     _.each(data, function(value, key) {
@@ -74,11 +77,29 @@ $(function(){
   });
 });
 
+function getChannel(){
+  var id = parseInt(this.innerHTML),
+    channel = convodb.find('id', id).select('displayname')[0];
+
+  console.log(id);
+  this.innerHTML = channel;
+  this.style.background = colorMap[id];
+
+  $(this).addClass('convo-' + id).hover(
+    function() { 
+      $(".convo-" + id).addClass('hover'); 
+      $(".convo-" + id).parent().parent().addClass('hover'); 
+    },
+    function() { 
+      $(".convo-" + id).removeClass('hover'); 
+      $(".convo-" + id).parent().parent().removeClass('hover'); 
+    }
+ );
+}
 function getName(){
   var value = this.innerHTML;
   if(nameMap[value]) {
     this.innerHTML = nameMap[value];
-    console.log(colorMap[value]);
     this.style.background = colorMap[value];
   }
   var cName = value.replace(/[^\w]/g,'');
@@ -117,7 +138,7 @@ function showCalls() {
           time = temp.pop(),
           hour = time.split(':').shift();
 
-      temp.push("<u class='time-" + hour + "'>" + time + "</u>");
+      temp.push( time );
       row.begin_timestamp = temp.join(' ');
 
       row.current_video_audience = row.current_video_audience.replace(/^\s+/, '').replace(/\s+$/, '');
@@ -129,13 +150,8 @@ function showCalls() {
         .appendTo("#results");
 
      });
-     for(var hour = 0; hour < 24; hour++) {
-       $(".time-" + (100 + hour).toString().slice(1)).hover(
-         function(){ $("." + this.className).parent().parent().parent().addClass('hover') },
-         function(){ $("." + this.className).parent().parent().parent().removeClass('hover') }
-       );
-     }
 
+     $(".channel span").each(getChannel);
      $(".members span").each(getName);
   });
 }

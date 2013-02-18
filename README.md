@@ -2,21 +2,19 @@
 
 Just put this little thing on a server my friend.
 
-Here's a screen shot:
-
-<img src=http://i.imgur.com/cIHy9gb.png>
-
-If you click on a timestamp then you get all messages +/- a 13 message window around the search context within the search room.
-
-Also, there's a call log feature now ... it looks like this
-<img src=http://i.imgur.com/pdAqJ9I.png>
-Except for the japanese-porn blur.
+## Holy shit, it's a useful call log.
+<img src=http://i.imgur.com/UExJUIJ.png>
 Features above:
 
 * Every user has a unique background color
 * Hover over a username to get a highlight of their membership, and the calls they were on.
 * All username are alphabetized per call.
-* Hover over the TIME to get all calls within that hour every day.
+
+
+## Crap, I can search sensibly!
+<img src=http://i.imgur.com/cIHy9gb.png>
+
+If you click on a timestamp then you get all messages +/- a 13 message window around the search context within the search room.
 
 All you have to do is find a file called main.db, it's in your .Skype/username/ directory.  Now take a COPY (don't move it you fool) and drop it into the api directory.  Host this locally, unless you want the world to search your databases.
 
