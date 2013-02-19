@@ -8,101 +8,8 @@
     <meta name="author" content="">
 
     <!-- Le styles -->
-    <link href="css/bootstrap.css" rel="stylesheet">
-    <style>
-      body {
-       padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
-      }
-      #copy{
-       text-align:center;
-       padding-top: 900px;
-      }
-      small { display: block;
-        font-weight:normal;
-        white-space:nowrap;
-        text-indent: 0.15em;
-        color: #888;
-        font-family: monospace;
-
-      }
-      a { cursor: pointer }
-      .members span {
-        background:#434;
-        color:transparent;
-/*        text-shadow: 0 0 15px #ede;  */
-        color:#ede;  
-        white-space: pre;
-        padding:0.5em;
-        margin:0.15em;
-        cursor: pointer;
-        width:9em
-      }
-      .channel span {
-        box-shadow: 
-          2px 2px 4px rgba(250,250,250,0.5) inset,
-          -2px -2px 4px rgba(0,0,0,0.5) inset;
-        color: transparent;
-/*        text-shadow:0 0 10px white; */
-        color:#ede;   
-        padding:1em;
-        width:9em;
-      }
-      .hover {
-        background: rgba(188,188,210,0.5);
-      }
-      .members span.hover {
-        opacity:0.5;
-        background:#000 !important;
-        box-shadow: 
-          0 0 2px 4px #339,
-          inset 0px 0px 1px 2px #aac;
-      }
-      .result {
-        border-top: 1px solid #a9a;
-        margin: 1em 0;
-      }
-      .row > .row {
-        margin-left: 0;
-      }
-      .off > * { display: none }
-      .row.result.highlight,
-      .off .highlight {
-        background: none;
-      }
-      .call span{ 
-        display:inline-block;
-        padding:0.3em 0.5em;
-        margin:0.25em;
-        vertical-align: middle;
-      }
-      .call .timestamp,
-      .call .duration { font-weight: bold;
-        font-size:1.25em;
-      }
-      .call .timestamp {
-        font-weight:normal;
-        font-size:1em;
-      }
-      .call .timestamp u {
-        text-decoration: none;
-        font-size:1.25em;
-      }
-      .call { 
-        vertical-align: middle;
-        margin: 0.25em 0;
-        border-bottom: 1px solid #434 }
-
-      .highlight {
-        cursor: pointer;
-        background: rgba(250,250,160, 0.5);
-        border-radius: 12px;
-        display: block !important;
-      }
-      .row.result.highlight:hover,
-      .highlight:hover {
-        background: rgba(250,250,160, 1.0);
-      }
-    </style>
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
     <link href="css/bootstrap-responsive.css" rel="stylesheet">
 
     <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
@@ -132,21 +39,37 @@
           <form class="navbar-search pull-left" action=javascript:doSearch()>
             <input type="text" id="search" class="search-query" placeholder="Search">
           </form>
-          <ul class="nav">
-            <li><a id="search-text"></a></li>
-            <li><button onclick="showCalls()" class='btn'>Show Calls</button></a></li>
-          </ul>
+          <div class="tabbable tabs-left">
+            <ul class="nav ">
+              <li><a id="search-text"></a></li>
+              <li><button onclick="showCalls()" class='btn'>Show Calls</button></a></li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>
 
-    <div class="container" id="results">
+    <div class="container-fluid">
+      <div class="row-fluid">
+        <div class="span2">
+          <ul id="channelList" class="nav nav-pills nav-stacked">
+          </ul>
+        </div>
+        <div class="span10">
+          <div class="container" id="results">
+        </div>
+      </div>
+    </div>
+
 
 
     </div> <!-- /container -->
 
     <div id=copy>done by chris.mckenzie. <a href=https://github.com/kristopolous/skype-search>latest version</a></div>
 
+    <script type="text/template" id="Channel-Item">
+      <li><a><%= content %></a></li>
+    </script>
     <script type="text/template" id="Call-Result">
       <div class="span1 timestamp"><span><%= begin_timestamp %></span></div>
       <div class="span1 duration"><span><%=duration %><small><%= fractional_duration %> hr</small></span></div>

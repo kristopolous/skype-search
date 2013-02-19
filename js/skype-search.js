@@ -1,10 +1,38 @@
-var template = {}, 
-    re, 
-    query;
+var 
+  h = 0, s = 0.3, v = 0.2,
+  template = {}, 
+  re, 
+  query,
+  convodb = DB(),
+  nameMap = {},
+  colorMap = {};
 
-$(document).ready(function(){
-  template.search = _.template($("#Search-Result").html());
-  template.call = _.template($("#Call-Result").html());
+$(function(){
+  template = {
+    search: _.template($("#Search-Result").html()),
+    call: _.template($("#Call-Result").html()),
+    channel: _.template($("#Channel-Item").html())
+  };
+
+  $.getJSON("api/conversations.php", function(data) {
+    _.each(data,function(what) {
+      colorMap[what.id] = nextColor();
+
+      $("#channelList").append(
+      template
+        .channel({
+          content: what.displayname
+        })
+      );
+    });
+    convodb.insert(data);
+  });
+  $.getJSON("api/whois.php", function(data) {
+    _.each(data, function(value, key) {
+      nameMap[value.skypename] = value.fullname;
+      colorMap[value.skypename] = nextColor();
+    });
+  });
 });
 
 function doDuration(num) {
@@ -21,39 +49,36 @@ function doFractionalDuration(num) {
   return (num / 3600).toFixed(3);
 }
 
-var 
-  convodb = DB(),
-  nameMap = {},
-  colorMap = {};
-
 function hsv2rgb(h, s, v) {
-    h = (h % 1 + 1) % 1; // wrap hue
+  h = (h % 1 + 1) % 1; // wrap hue
 
-    var i = Math.floor(h * 6),
-        f = h * 6 - i,
-        p = v * (1 - s),
-        q = v * (1 - s * f),
-        t = v * (1 - s * (1 - f));
+  var i = Math.floor(h * 6),
+      f = h * 6 - i,
+      p = v * (1 - s),
+      q = v * (1 - s * f),
+      t = v * (1 - s * (1 - f));
 
-    switch (i) {
-        case 0: return [v, t, p];
-        case 1: return [q, v, p];
-        case 2: return [p, v, t];
-        case 3: return [p, q, v];
-        case 4: return [t, p, v];
-        case 5: return [v, p, q];
-    }
+  switch (i) {
+    case 0: return [v, t, p];
+    case 1: return [q, v, p];
+    case 2: return [p, v, t];
+    case 3: return [p, q, v];
+    case 4: return [t, p, v];
+    case 5: return [v, p, q];
+  }
 }
-var h = 0, s = 0.3, v = 0.2;
+
 function nextColor() {
   v += 0.035;
   h += 0.06;
+
   if(v >= 0.5) {
     v = 0.1;
   }
   if(h >= 1) {
     h = 0;
   }
+
   var mycolor = hsv2rgb(h, s, v);
   mycolor[0] *= 256;
   mycolor[1] *= 256;
@@ -62,20 +87,6 @@ function nextColor() {
   return 'rgb(' + mycolor.join(',') + ')';
 }
 
-$(function(){
-  $.getJSON("api/conversations.php", function(data) {
-    _.each(data,function(what) {
-      colorMap[what.id] = nextColor();
-    });
-    convodb.insert(data);
-  });
-  $.getJSON("api/whois.php", function(data) {
-    _.each(data, function(value, key) {
-      nameMap[value.skypename] = value.fullname;
-      colorMap[value.skypename] = nextColor();
-    });
-  });
-});
 
 function getChannel(){
   var id = parseInt(this.innerHTML),
@@ -96,12 +107,15 @@ function getChannel(){
     }
  );
 }
+
 function getName(){
   var value = this.innerHTML;
+
   if(nameMap[value]) {
     this.innerHTML = nameMap[value];
     this.style.background = colorMap[value];
   }
+
   var cName = value.replace(/[^\w]/g,'');
 
   $(this).addClass('user-' + cName).hover(
@@ -200,7 +214,6 @@ function doSearch(){
 
   re = new RegExp("(" + query + ")", 'ig');
 
-  $("#search-text").html("Searching for " + query);
   $.getJSON("api/search.php?q=" + escape(query), function(data) {
     $("#results").empty();
     if(data.length) {

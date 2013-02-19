@@ -1,0 +1,92 @@
+body {
+ padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
+}
+#copy{
+ text-align:center;
+ padding-top: 900px;
+}
+small { display: block;
+  font-weight:normal;
+  white-space:nowrap;
+  text-indent: 0.15em;
+  color: #888;
+  font-family: monospace;
+
+}
+a { cursor: pointer }
+.members span {
+  background:#434;
+  color:transparent;
+/*        text-shadow: 0 0 15px #ede;  */
+  color:#ede;  
+  white-space: pre;
+  padding:0.5em;
+  margin:0.15em;
+  cursor: pointer;
+  width:9em
+}
+.channel span {
+  box-shadow: 
+    2px 2px 4px rgba(250,250,250,0.5) inset,
+    -2px -2px 4px rgba(0,0,0,0.5) inset;
+  color: transparent;
+/*        text-shadow:0 0 10px white; */
+  color:#ede;   
+  padding:1em;
+  width:9em;
+}
+.hover {
+  background: rgba(188,188,210,0.5);
+}
+.members span.hover {
+  opacity:0.5;
+  background:#000 !important;
+  box-shadow: 
+    0 0 2px 4px #339,
+    inset 0px 0px 1px 2px #aac;
+}
+.result {
+  border-top: 1px solid #a9a;
+  margin: 1em 0;
+}
+.row > .row {
+  margin-left: 0;
+}
+.off > * { display: none }
+.row.result.highlight,
+.off .highlight {
+  background: none;
+}
+.call span{ 
+  display:inline-block;
+  padding:0.3em 0.5em;
+  margin:0.25em;
+  vertical-align: middle;
+}
+.call .timestamp,
+.call .duration { font-weight: bold;
+  font-size:1.25em;
+}
+.call .timestamp {
+  font-weight:normal;
+  font-size:1em;
+}
+.call .timestamp u {
+  text-decoration: none;
+  font-size:1.25em;
+}
+.call { 
+  vertical-align: middle;
+  margin: 0.25em 0;
+  border-bottom: 1px solid #434 }
+
+.highlight {
+  cursor: pointer;
+  background: rgba(250,250,160, 0.5);
+  border-radius: 12px;
+  display: block !important;
+}
+.row.result.highlight:hover,
+.highlight:hover {
+  background: rgba(250,250,160, 1.0);
+}
