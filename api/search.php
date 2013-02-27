@@ -5,14 +5,14 @@ $pre = "select $fields from Messages";
 
 if(!empty($_GET['q'])) {
   // search works better when it's an and clause really as opposed to contiguous words.
-  // at least that's how I work... 
-  $queryList = explode(' ', mysql_real_escape_string($_GET['q']));
+  // at least that's how I work...
+  $queryList = explode(' ', addslashes($_GET['q']));
   $qres = $db->query("$pre where body_xml like '%" . implode("%' and body_xml like '%", $queryList) . "%' order by timestamp desc limit 1000");
   while(($res[] = prune($qres)) != null);
 } else {
 
-  $ts = mysql_real_escape_string($_GET['ts']);
-  $convo = mysql_real_escape_string($_GET['convo']);
+  $ts = addslashes($_GET['ts']);
+  $convo = addslashes($_GET['convo']);
 
   // The contextual result of +/- 13 messages is done with 2 queries:
   // one that looks for things prior to the input tyimme in the given convo
