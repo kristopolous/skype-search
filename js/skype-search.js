@@ -3,7 +3,9 @@ var
   template = {}, 
   re, 
   query,
+  ev = EvDa(),
   convodb = DB(),
+  callLog,
   nameMap = {},
   colorMap = {};
 
@@ -88,6 +90,30 @@ function nextColor() {
 }
 
 
+function showAll(){
+  $(".call-filter").empty();
+  $("#showAll").attr("disabled", true);
+
+  ev('calls').update(function(row){
+    row.visible = true;
+  });
+  showCalls();
+}
+
+function channelFilter() {
+  var channel = this.innerHTML;
+  $(".call-filter").html("Showing just " + channel);
+  document.getElementById("showAll").removeAttribute("disabled");
+
+  var id = convodb.findFirst({displayname: channel}).id
+    console.log(id);
+
+  ev('calls').update(function(row){
+    row.visible = (row.conv_dbid == id);
+  });
+  showCalls();
+}
+
 function getChannel(){
   var id = parseInt(this.innerHTML),
     channel = convodb.find('id', id).select('displayname')[0];
@@ -105,7 +131,7 @@ function getChannel(){
       $(".convo-" + id).removeClass('hover'); 
       $(".convo-" + id).parent().parent().removeClass('hover'); 
     }
- );
+ ).click(channelFilter);
 }
 
 function getName(){
@@ -130,43 +156,52 @@ function getName(){
  );
 }
 
-function showCalls() {
+ev.setter('calls', function(done) {
   $.getJSON("api/calls.php", function(data) {
-    $("#results").empty();
-    if(!data.length) {
-      return;
-    }
-    _.each(data, function(row) {
-      if(!row) { return; }
-
+    var db = DB(data);
+    db.update(function(row){
+      row.visible = true;
       row.duration_real = row.duration;
       row.duration = doDuration(row.duration);
       if(!row.duration) { return; }
 
       row.fractional_duration = doFractionalDuration(row.duration_real);
 
-      row.begin_timestamp = (new Date(row.begin_timestamp * 1000)).toLocaleString().split(' ').slice(1,-1)
-      row.begin_timestamp.splice(2, 1);
+      row.begin_timestamp = (new Date(row.begin_timestamp * 1000)).toLocaleString().split(' ').slice(0,-1)
+  //      row.begin_timestamp.splice(1, 1);
       row.begin_timestamp = row.begin_timestamp.join(' ').replace(/GMT.*/, '').replace(/\s$/,'');
       var temp = row.begin_timestamp.split(' '),
           time = temp.pop(),
           hour = time.split(':').shift();
 
       temp.push( time );
-      row.begin_timestamp = temp.join(' ');
+  //     row.begin_timestamp = temp.join(' ');
 
       row.current_video_audience = row.current_video_audience.replace(/^\s+/, '').replace(/\s+$/, '');
 
       row.current_video_audience = '<span>' + row.current_video_audience.split(/\s+/).sort().join('</span><span>') + '</span>';
+    });
+
+    done(db);
+  })
+});
+
+function showCalls() {
+  ev.isset('calls', function(db) {
+    $("#results").empty();
+
+    db.find({visible: true}).each(function(row) {
+      if(!row.duration) { return; }
+
 
       $("<div class='row call'>")
         .html( template.call(row) )
         .appendTo("#results");
 
-     });
+    });
 
-     $(".channel span").each(getChannel);
-     $(".members span").each(getName);
+    $(".channel span").each(getChannel);
+    $(".members span").each(getName);
   });
 }
 

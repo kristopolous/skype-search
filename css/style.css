@@ -33,6 +33,7 @@ a { cursor: pointer }
 /*        text-shadow:0 0 10px white; */
   color:#ede;   
   padding:1em;
+  cursor: pointer;
   width:9em;
 }
 .hover {
