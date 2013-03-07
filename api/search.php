@@ -12,13 +12,13 @@ if(!empty($_GET['q'])) {
     $room = "";
   }
 
-  $queryList = explode(' ', mysql_real_escape_string($_GET['q']));
+  $queryList = explode(' ', addslashes($_GET['q']));
   $qres = $db->query("$pre where body_xml like '%" . implode("%' and body_xml like '%", $queryList) . "%' $room order by timestamp desc limit 1000");
   while(($res[] = prune($qres)) != null);
 } else {
 
-  $ts = mysql_real_escape_string($_GET['ts']);
-  $convo = mysql_real_escape_string($_GET['convo']);
+  $ts = addslashes($_GET['ts']);
+  $convo = addslashes($_GET['convo']);
 
   // The contextual result of +/- 13 messages is done with 2 queries:
   // one that looks for things prior to the input tyimme in the given convo
