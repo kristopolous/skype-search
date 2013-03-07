@@ -3,13 +3,17 @@
 Just put this little thing on a server my friend.
 
 ## Holy shit, it's a useful call log.
-<img src=http://i.imgur.com/UExJUIJ.png>
+<img src=http://i.imgur.com/bagatWC.png>
 Features above:
 
 * Every user has a unique background color
 * Hover over a username to get a highlight of their membership, and the calls they were on.
 * All username are alphabetized per call.
+* You can click on the channel name on the right to see *ONLY THE CALLS* in that channel
+* You get *fractional hours* for each call
+* You have an *auto-complete room* filter so you can see calls from a larger set.
 
+Note: The text isn't actually ugly-ass-yellow. That's just for the screen shot.
 
 ## Crap, I can search sensibly!
 <img src=http://i.imgur.com/cIHy9gb.png>

@@ -16,8 +16,6 @@ small { display: block;
 a { cursor: pointer }
 .members span {
   background:#434;
-  color:transparent;
-/*        text-shadow: 0 0 15px #ede;  */
   color:#ede;  
   white-space: pre;
   padding:0.5em;
@@ -29,13 +27,12 @@ a { cursor: pointer }
   box-shadow: 
     2px 2px 4px rgba(250,250,250,0.5) inset,
     -2px -2px 4px rgba(0,0,0,0.5) inset;
-  color: transparent;
-/*        text-shadow:0 0 10px white; */
-  color:#ede;   
+  color:#ede;  
   padding:1em;
   cursor: pointer;
   width:9em;
 }
+
 .hover {
   background: rgba(188,188,210,0.5);
 }
@@ -95,3 +92,10 @@ a { cursor: pointer }
   cursor: pointer;
   margin-right: 1em
 }
+/*
+.dropdown-menu *,
+.dropdown-menu li, .channel span, .members span, .label {
+  color: transparent !important;
+  text-shadow:0 0 10px yellow;
+}
+*/
