@@ -11,7 +11,6 @@ var
     channelIds: []
   }),
   convodb = DB(),
-  callLog,
   nameMap = {},
   colorMap = {};
 
@@ -55,7 +54,13 @@ $(function(){
     var channels = convodb.select('displayname');
     $("#room").typeahead({
       source: function(){ 
-        return _.difference(channels, ev("channelList"));
+        var set;
+        if(ev('state') == 'Chat') {
+          set = _.difference(channels, ev("channelList"));
+        } else {
+          set = _.difference(ev('callList'), ev('channelList'));
+        }
+        return _.uniq(set);
       },
       updater: function(what) {
         ev.setadd("channelList", what);
@@ -172,6 +177,20 @@ ev.setter('calls', function(done) {
 
       row.current_video_audience = '<span>' + row.current_video_audience.split(/\s+/).sort().join('</span><span>') + '</span>';
     });
+
+    // This is the set with calls
+    ev.set(
+      "callList", 
+      convodb.find({
+        id: DB.isin(
+          _.uniq(
+            db
+              .find()
+              .select('conv_dbid')
+          )
+        )
+      }).select('displayname')
+    );
 
     // db is our calls
     done(db);
