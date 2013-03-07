@@ -61,8 +61,17 @@ a { cursor: pointer }
   margin:0.25em;
   vertical-align: middle;
 }
+.result .timestamp {
+  display: block;
+  font-size: 0.8em
+}
+.result .author { 
+  padding-left: 0.5em;
+}
+
 .call .timestamp,
-.call .duration { font-weight: bold;
+.call .duration { 
+  font-weight: bold;
   font-size:1.25em;
 }
 .call .timestamp {
@@ -92,6 +101,13 @@ a { cursor: pointer }
   cursor: pointer;
   margin-right: 1em
 }
+.text { 
+  white-space: pre;
+  font-size: 0.75em;
+  line-height: 1.35em;
+  font-family: monospace 
+}
+partlist { display: none }
 /*
 .dropdown-menu *,
 .dropdown-menu li, .channel span, .members span, .label {

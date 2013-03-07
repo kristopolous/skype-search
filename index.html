@@ -89,9 +89,9 @@
     </script>
 
     <script type="text/template" id="Search-Result">
-      <div class="span1 timestamp"><%= timestamp %></div>
-      <div class="span2 author"><%= from_dispname %></div>
-      <div class="span8 text"><%= body_xml %></div>
+      <div class="span2 author"><%= $.trim(from_dispname) %>
+      <span class='timestamp'><%= timestamp %></span></div>
+      <div class="span10 text"><%= body_xml %></div>
     </script>
     <!-- Le javascript
     ================================================== -->

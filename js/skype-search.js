@@ -265,7 +265,13 @@ function process(row) {
     .replace(re, '<b>$1</b>');
 
   row.rawtimestamp = row.timestamp;
-  row.timestamp = (new Date(row.timestamp * 1000)).toLocaleString().split(' ').slice(0,-1).join(' <br>').replace(/GMT.*/, '');
+  row.timestamp = (new Date(row.timestamp * 1000))
+    .toLocaleString()
+    .split(' ')
+    .slice(0, -1)
+    .reverse()
+    .join(' ')
+    .replace(/GMT.*/, '');
 }
 
 function showChat() {
