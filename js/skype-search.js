@@ -82,8 +82,8 @@ ev.on("channelList", function(what) {
 });
 
 ev.on("channelIds", function(idList) {
-  if(ev.db.calls) {
-    if(idList) {
+  if(ev('state') == 'Calls') {
+    if(idList.length) {
       ev('calls').update(function(row){
         row.visible = _.indexOf(idList, row.conv_dbid) > -1;
       });
@@ -195,7 +195,6 @@ ev("state", function(state) {
 });
 
 function showCalls() {
-
   ev.isset('calls', function(db) {
     $("#results").empty();
 
