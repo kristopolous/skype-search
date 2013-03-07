@@ -36,30 +36,33 @@
             <span class="icon-bar"></span>
           </button>
           <a class="brand" href="#">Skype Search</a>
-          <form class="navbar-search pull-left" action=javascript:doSearch()>
+          <form class="navbar-search pull-left" action=javascript:finderAlias()>
             <input type="text" id="search" class="search-query" placeholder="Search">
           </form>
           <div class="tabbable tabs-left">
             <ul class="nav ">
               <li><a id="search-text"></a></li>
-              <li><button onclick="showCalls()" class='btn'>Show Calls</button></a></li>
             </ul>
-            <ul class="nav pull-right">
-              <li><a class="call-filter"></a></li>
-              <li><button id="showAll" disabled onclick="showAll()" class='btn'>Show All</button></a></li>
+            <ul class="nav nav-pills">
+              <li><a onclick="state(this)">Calls</a></li>
+              <li class="active"><a onclick="state(this)">Chat</a></li>
             </ul>
+            <form class="navbar-search pull-left">
+              <input data-provide="typeahead" type="text" id="room" class="search-query" placeholder="Room Filter">
+              <button id="showAll" disabled onclick="filterClear()" class='btn'>Show All</button>
+            </form>
+          </div>
+          <div class="container" id="filterList-container">
+            <span id="filterList"></span>
           </div>
         </div>
       </div>
     </div>
 
+
     <div class="container-fluid">
       <div class="row-fluid">
-        <div class="span2">
-          <ul id="channelList" class="nav nav-pills nav-stacked">
-          </ul>
-        </div>
-        <div class="span10">
+        <div class="span12">
           <div class="container" id="results">
         </div>
       </div>
@@ -81,8 +84,12 @@
       <div class="span1 channel"><span><%= conv_dbid %></span></div>
     </script>
 
+    <script type="text/template" id="Filter-Room">
+      <span class="label"><%= room %></span>
+    </script>
+
     <script type="text/template" id="Search-Result">
-      <div class="span2 timestamp"><%= timestamp %></div>
+      <div class="span1 timestamp"><%= timestamp %></div>
       <div class="span2 author"><%= from_dispname %></div>
       <div class="span8 text"><%= body_xml %></div>
     </script>
@@ -90,9 +97,11 @@
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
     <script src="js/jquery.js"></script>
+    <script src="js/bootstrap.js"></script>
     <script src="js/underscore.js"></script>
     <script src="js/evda.min.js"></script>
     <script src="js/db.min.js"></script>
+    <script src="js/ui.js"></script>
     <script src="js/skype-search.js"></script>
 
   </body>

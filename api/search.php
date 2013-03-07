@@ -6,8 +6,14 @@ $pre = "select $fields from Messages";
 if(!empty($_GET['q'])) {
   // search works better when it's an and clause really as opposed to contiguous words.
   // at least that's how I work... 
+  if(!empty($_GET['rooms'])) {
+    $room = "and convo_id in (" . implode(',', $_GET['rooms']) . ")";
+  } else {
+    $room = "";
+  }
+
   $queryList = explode(' ', mysql_real_escape_string($_GET['q']));
-  $qres = $db->query("$pre where body_xml like '%" . implode("%' and body_xml like '%", $queryList) . "%' order by timestamp desc limit 1000");
+  $qres = $db->query("$pre where body_xml like '%" . implode("%' and body_xml like '%", $queryList) . "%' $room order by timestamp desc limit 1000");
   while(($res[] = prune($qres)) != null);
 } else {
 

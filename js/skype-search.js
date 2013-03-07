@@ -1,33 +1,66 @@
 var 
-  h = 0, s = 0.3, v = 0.2,
   template = {}, 
   re, 
   query,
-  ev = EvDa(),
+
+  finder,
+  finderAlias = function() { if(finder) { finder() } },
+
+  ev = EvDa({
+    channelList: [],
+    channelIds: []
+  }),
   convodb = DB(),
   callLog,
   nameMap = {},
   colorMap = {};
 
+ev.on("channelList", function(what){
+  $("#filterList").empty();
+
+  document.getElementById("showAll")[
+    (what.length ? "remove" : "set") +
+    "Attribute"
+  ]("disabled", true);
+
+  _.each(what, function(filter) {
+    $(template.room({
+      room: filter
+    })).click(function(){
+      ev.setdel("channelList", this.innerHTML);
+    }).hover(
+      function(){ $(this).addClass('label-inverse'); },
+      function(){ $(this).removeClass('label-inverse'); }
+    ).appendTo("#filterList");
+  });
+});
+
+function filterClear(){
+  ev("channelList", []);
+}
+
 $(function(){
   template = {
     search: _.template($("#Search-Result").html()),
     call: _.template($("#Call-Result").html()),
-    channel: _.template($("#Channel-Item").html())
+    channel: _.template($("#Channel-Item").html()),
+    room: _.template($("#Filter-Room").html())
   };
 
   $.getJSON("api/conversations.php", function(data) {
     _.each(data,function(what) {
       colorMap[what.id] = nextColor();
-
-      $("#channelList").append(
-      template
-        .channel({
-          content: what.displayname
-        })
-      );
     });
     convodb.insert(data);
+    var channels = convodb.select('displayname');
+    $("#room").typeahead({
+      source: function(){ 
+        return _.difference(channels, ev("channelList"));
+      },
+      updater: function(what) {
+        ev.setadd("channelList", what);
+      }
+    })
   });
   $.getJSON("api/whois.php", function(data) {
     _.each(data, function(value, key) {
@@ -37,88 +70,36 @@ $(function(){
   });
 });
 
-function doDuration(num) {
-  if(!num) { return false }
-  var res = [];
-  for(var i = 0; i < 3; i++) {
-    res.push((100 + (num % 60)).toString().slice(1));
-    num = Math.floor(num / 60);
+ev.on("channelList", function(what) {
+  if(ev('channelList').length) {
+    var idList = convodb.find({
+      displayname: DB.isin(ev('channelList'))
+    }).select('id');
+    ev('channelIds', idList);
+  } else {
+    ev('channelIds', []);
   }
-  return res.reverse().join(':');
-}
+});
 
-function doFractionalDuration(num) {
-  return (num / 3600).toFixed(3);
-}
-
-function hsv2rgb(h, s, v) {
-  h = (h % 1 + 1) % 1; // wrap hue
-
-  var i = Math.floor(h * 6),
-      f = h * 6 - i,
-      p = v * (1 - s),
-      q = v * (1 - s * f),
-      t = v * (1 - s * (1 - f));
-
-  switch (i) {
-    case 0: return [v, t, p];
-    case 1: return [q, v, p];
-    case 2: return [p, v, t];
-    case 3: return [p, q, v];
-    case 4: return [t, p, v];
-    case 5: return [v, p, q];
+ev.on("channelIds", function(idList) {
+  if(ev.db.calls) {
+    if(idList) {
+      ev('calls').update(function(row){
+        row.visible = _.indexOf(idList, row.conv_dbid) > -1;
+      });
+    } else {
+      ev('calls').update(function(row){
+        row.visible = true;
+      });
+    }
   }
-}
-
-function nextColor() {
-  v += 0.035;
-  h += 0.06;
-
-  if(v >= 0.5) {
-    v = 0.1;
-  }
-  if(h >= 1) {
-    h = 0;
-  }
-
-  var mycolor = hsv2rgb(h, s, v);
-  mycolor[0] *= 256;
-  mycolor[1] *= 256;
-  mycolor[2] *= 256;
-  mycolor = _.map(mycolor, Math.floor);
-  return 'rgb(' + mycolor.join(',') + ')';
-}
-
-
-function showAll(){
-  $(".call-filter").empty();
-  $("#showAll").attr("disabled", true);
-
-  ev('calls').update(function(row){
-    row.visible = true;
-  });
-  showCalls();
-}
-
-function channelFilter() {
-  var channel = this.innerHTML;
-  $(".call-filter").html("Showing just " + channel);
-  document.getElementById("showAll").removeAttribute("disabled");
-
-  var id = convodb.findFirst({displayname: channel}).id
-    console.log(id);
-
-  ev('calls').update(function(row){
-    row.visible = (row.conv_dbid == id);
-  });
-  showCalls();
-}
+  finderAlias();
+});
 
 function getChannel(){
   var id = parseInt(this.innerHTML),
     channel = convodb.find('id', id).select('displayname')[0];
 
-  console.log(id);
   this.innerHTML = channel;
   this.style.background = colorMap[id];
 
@@ -131,7 +112,9 @@ function getChannel(){
       $(".convo-" + id).removeClass('hover'); 
       $(".convo-" + id).parent().parent().removeClass('hover'); 
     }
- ).click(channelFilter);
+ ).click(function(){
+   ev("channelList", [channel]);
+ });
 }
 
 function getName(){
@@ -158,7 +141,15 @@ function getName(){
 
 ev.setter('calls', function(done) {
   $.getJSON("api/calls.php", function(data) {
-    var db = DB(data);
+    var db = DB();
+
+    db.addIf(function(row) {
+      var test = !!row.current_video_audience;
+      return test;
+    })
+
+    db.insert(data);
+
     db.update(function(row){
       row.visible = true;
       row.duration_real = row.duration;
@@ -182,11 +173,29 @@ ev.setter('calls', function(done) {
       row.current_video_audience = '<span>' + row.current_video_audience.split(/\s+/).sort().join('</span><span>') + '</span>';
     });
 
+    // db is our calls
     done(db);
   })
 });
 
+function state(el) {
+  $(el).parent().addClass("active").siblings().removeClass("active");
+  ev("state", el.innerHTML);
+}
+
+ev("state", function(state) {
+  if(state == "Calls") {
+    $("#search").hide();
+    finder = showCalls;
+  } else { // chat
+    $("#search").show();
+    finder = showChat;
+  }
+  finder();
+});
+
 function showCalls() {
+
   ev.isset('calls', function(db) {
     $("#results").empty();
 
@@ -240,16 +249,19 @@ function process(row) {
     .replace(re, '<b>$1</b>');
 
   row.rawtimestamp = row.timestamp;
-  row.timestamp = (new Date(row.timestamp * 1000)).toLocaleString().split(' ').slice(1,-1).join(' ').replace(/GMT.*/, '');
+  row.timestamp = (new Date(row.timestamp * 1000)).toLocaleString().split(' ').slice(0,-1).join(' <br>').replace(/GMT.*/, '');
 }
 
-function doSearch(){
+function showChat() {
   query = $("#search").val();
   window.location.hash = query;
 
   re = new RegExp("(" + query + ")", 'ig');
 
-  $.getJSON("api/search.php?q=" + escape(query), function(data) {
+  $.getJSON("api/search.php?", {
+    q: query,
+    rooms: ev('channelIds')
+  }, function(data) {
     $("#results").empty();
     if(data.length) {
       _.each(data, function(row) {
@@ -265,9 +277,10 @@ function doSearch(){
   })
 }
 
+ev('state', 'Chat');
 setInterval(function(){
   if(window.location.hash.slice(1) != query) {
     $("#search").val(window.location.hash.slice(1));
-    doSearch();
+    finderAlias();
   }
 }, 100);

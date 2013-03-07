@@ -91,3 +91,7 @@ a { cursor: pointer }
 .highlight:hover {
   background: rgba(250,250,160, 1.0);
 }
+#filterList .label {
+  cursor: pointer;
+  margin-right: 1em
+}
