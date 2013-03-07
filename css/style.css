@@ -66,6 +66,8 @@ a { cursor: pointer }
   font-size: 0.8em
 }
 .result .author { 
+  line-height: 1.15em;
+  font-size: 0.8em;
   padding-left: 0.5em;
 }
 

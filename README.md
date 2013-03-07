@@ -12,6 +12,8 @@ Features above:
 * You can click on the channel name on the right to see *ONLY THE CALLS* in that channel
 * You get *fractional hours* for each call
 * You have an *auto-complete room* filter so you can see calls from a larger set.
+  * In the "Chat" mode, this is all the rooms
+  * In the "Call" mode, this is only the rooms that have had calls.
 
 Note: The text isn't actually ugly-ass-yellow. That's just for the screen shot.
 
@@ -27,3 +29,9 @@ If you wanted to be smarter, you could do something like a hardlink instead of a
 Certainly not I.  Have fun.
 
 Oh yeah, I only show the first *ONE THOUSAND* results; to try to save your browser from locking up due to some bad query.
+
+## Here's some info
+
+* Edited messages are edited in the database. There is no record of its previous state (although there may be in the journal or other parts of what skype stores ...)
+* Removed messages are the same deal.
+* Skype keeps changing its schema AND backend way of storing data. Older versions of skype (2.x) don't use sqlite3 at all for the db - but some asofyet unknown format.
