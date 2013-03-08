@@ -259,10 +259,13 @@ function Expand(ts, convo, el) {
 }
 
 function process(row) {
-  row.body_xml = row.body_xml
+  // a little trick to make sure we don't regex replace
+  // inside of a tag.
+  row.body_xml = ('>' + row.body_xml + '<')
     .replace(/\ \ /g, '&nbsp; ')
     .replace(/\n/g, "<br>")
-    .replace(re, '<b>$1</b>');
+    .replace(re, '>$1<b>$2</b>$3<')
+    .slice(1, -1);
 
   row.rawtimestamp = row.timestamp;
   row.timestamp = (new Date(row.timestamp * 1000))
@@ -278,7 +281,7 @@ function showChat() {
   query = $("#search").val();
   window.location.hash = query;
 
-  re = new RegExp("(" + query + ")", 'ig');
+  re = new RegExp(">(.*)(" + query + ")(.*)<", 'ig');
 
   $.getJSON("api/search.php?", {
     q: query,
