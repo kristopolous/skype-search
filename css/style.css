@@ -68,7 +68,7 @@ a { cursor: pointer }
 .result .author { 
   line-height: 1.15em;
   font-size: 0.8em;
-  padding-left: 0.5em;
+  padding-left: 1.25em;
 }
 
 .call .timestamp,
@@ -107,6 +107,16 @@ a { cursor: pointer }
   font-size: 0.75em;
   line-height: 1.35em;
   font-family: monospace 
+}
+.result {
+  position: relative
+}
+.result .expand {
+  padding: 0.2em;
+  zoom: 0.5;
+  position: absolute;
+  top: 0;
+  left: -1em;
 }
 partlist { display: none }
 /*

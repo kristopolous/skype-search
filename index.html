@@ -64,12 +64,9 @@
       <div class="row-fluid">
         <div class="span12">
           <div class="container" id="results">
+          </div>
         </div>
       </div>
-    </div>
-
-
-
     </div> <!-- /container -->
 
     <div id=copy>done by chris.mckenzie. <a href=https://github.com/kristopolous/skype-search>latest version</a></div>
@@ -89,8 +86,7 @@
     </script>
 
     <script type="text/template" id="Search-Result">
-      <div class="span2 author"><%= $.trim(from_dispname) %>
-      <span class='timestamp'><%= timestamp %></span></div>
+      <div class="span2 author"><%= $.trim(from_dispname) %><span class='timestamp'><%= timestamp %></span></div>
       <div class="span10 text"><%= body_xml %></div>
     </script>
     <!-- Le javascript

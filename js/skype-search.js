@@ -292,9 +292,20 @@ function showChat() {
       _.each(data, function(row) {
         if(!row) { return; }
         process(row);
-        $("<div class='row result highlight'>").html( template.search(row) ).on('click', function(){
-          Expand(row.rawtimestamp, row.convo_id, this);
-        }).appendTo("#results");
+
+        var 
+          expand = $('<a class="btn expand"><i class="icon-chevron-down"></i></a>'),
+          resultDOM = $("<div class='row result' />"),
+          rowDOM = $("<div class='row' />").html(template.search(row));
+
+        $(expand).click(function(){
+          Expand(row.rawtimestamp, row.convo_id, this.parentNode);
+        })
+
+        resultDOM
+          .append(expand)
+          .append(rowDOM)
+          .appendTo("#results");
       });
     } else {
       $("#results").html("<h2>Woops, nothing found for '" + query + "'. Check the spelling?</h2>");
