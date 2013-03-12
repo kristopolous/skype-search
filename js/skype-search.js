@@ -41,6 +41,7 @@ function filterClear(){
 $(function(){
   template = {
     search: _.template($("#Search-Result").html()),
+    container: _.template($("#Search-Container").html()),
     call: _.template($("#Call-Result").html()),
     channel: _.template($("#Channel-Item").html()),
     room: _.template($("#Filter-Room").html())
@@ -67,38 +68,13 @@ $(function(){
       }
     })
   });
+
   $.getJSON("api/whois.php", function(data) {
     _.each(data, function(value, key) {
       nameMap[value.skypename] = value.fullname;
       colorMap[value.skypename] = nextColor();
     });
   });
-});
-
-ev.on("channelList", function(what) {
-  if(ev('channelList').length) {
-    var idList = convodb.find({
-      displayname: DB.isin(ev('channelList'))
-    }).select('id');
-    ev('channelIds', idList);
-  } else {
-    ev('channelIds', []);
-  }
-});
-
-ev.on("channelIds", function(idList) {
-  if(ev('state') == 'Calls') {
-    if(idList.length) {
-      ev('calls').update(function(row){
-        row.visible = _.indexOf(idList, row.conv_dbid) > -1;
-      });
-    } else {
-      ev('calls').update(function(row){
-        row.visible = true;
-      });
-    }
-  }
-  finderAlias();
 });
 
 function getChannel(){
@@ -200,15 +176,43 @@ function state(el) {
   ev("state", el.innerHTML);
 }
 
-ev("state", function(state) {
-  if(state == "Calls") {
-    $("#search").hide();
-    finder = showCalls;
-  } else { // chat
-    $("#search").show();
-    finder = showChat;
+ev({
+  channelList: function(what) {
+    if(ev('channelList').length) {
+      var idList = convodb.find({
+        displayname: DB.isin(ev('channelList'))
+      }).select('id');
+      ev('channelIds', idList);
+    } else {
+      ev('channelIds', []);
+    }
+  },
+
+  channelIds: function(idList) {
+    if(ev('state') == 'Calls') {
+      if(idList.length) {
+        ev('calls').update(function(row){
+          row.visible = _.indexOf(idList, row.conv_dbid) > -1;
+        });
+      } else {
+        ev('calls').update(function(row){
+          row.visible = true;
+        });
+      }
+    }
+    finderAlias();
+  },
+
+  state: function(state) {
+    if(state == "Calls") {
+      $("#search").hide();
+      finder = showCalls;
+    } else { // chat
+      $("#search").show();
+      finder = showChat;
+    }
+    finder();
   }
-  finder();
 });
 
 function showCalls() {
@@ -217,7 +221,6 @@ function showCalls() {
 
     db.find({visible: true}).each(function(row) {
       if(!row.duration) { return; }
-
 
       $("<div class='row call'>")
         .html( template.call(row) )
@@ -294,18 +297,22 @@ function showChat() {
         process(row);
 
         var 
-          expand = $('<a class="btn expand"><i class="icon-chevron-down"></i></a>'),
           resultDOM = $("<div class='row result' />"),
           rowDOM = $("<div class='row' />").html(template.search(row));
 
-        $(expand).click(function(){
-          Expand(row.rawtimestamp, row.convo_id, this.parentNode);
-        })
+        resultDOM.html(template.container({
+          row: rowDOM.html()
+        })).appendTo("#results");
 
+        $(".expand", resultDOM).click(function(){
+          Expand(row.rawtimestamp, row.convo_id, $(this).next());
+        })
+/*
         resultDOM
           .append(expand)
           .append(rowDOM)
           .appendTo("#results");
+*/
       });
     } else {
       $("#results").html("<h2>Woops, nothing found for '" + query + "'. Check the spelling?</h2>");
