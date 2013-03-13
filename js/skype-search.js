@@ -10,7 +10,6 @@ var
     channelList: [],
     channelIds: []
   }),
-  convodb = DB(),
   nameMap = {},
   colorMap = {};
 
@@ -51,8 +50,8 @@ $(function(){
     _.each(data,function(what) {
       colorMap[what.id] = nextColor();
     });
-    convodb.insert(data);
-    var channels = convodb.select('displayname');
+    ev.set('convodb', DB(data));
+    var channels = ev('convodb').select('displayname');
     $("#room").typeahead({
       source: function(){ 
         var set;
@@ -78,8 +77,11 @@ $(function(){
 });
 
 function getChannel(){
-  var id = parseInt(this.innerHTML),
-    channel = convodb.find('id', id).select('displayname')[0];
+  var 
+    id = parseInt(this.innerHTML),
+    channel = ev('convodb')
+      .find('id', id)
+      .select('displayname')[0];
 
   this.innerHTML = channel;
   this.style.background = colorMap[id];
@@ -155,7 +157,7 @@ ev.setter('calls', function(done) {
     // This is the set with calls
     ev.set(
       "callList", 
-      convodb.find({
+      ev('convodb').find({
         id: DB.isin(
           _.uniq(
             db
@@ -172,14 +174,19 @@ ev.setter('calls', function(done) {
 });
 
 function state(el) {
-  $(el).parent().addClass("active").siblings().removeClass("active");
+  $(el)
+    .parent()
+    .addClass("active")
+    .siblings()
+    .removeClass("active");
+
   ev("state", el.innerHTML);
 }
 
 ev({
   channelList: function(what) {
     if(ev('channelList').length) {
-      var idList = convodb.find({
+      var idList = ev('convodb').find({
         displayname: DB.isin(ev('channelList'))
       }).select('id');
       ev('channelIds', idList);
@@ -281,6 +288,8 @@ function process(row) {
 }
 
 function showChat() {
+  var lastchannel;
+
   query = $("#search").val();
   window.location.hash = query;
 
@@ -297,10 +306,16 @@ function showChat() {
         process(row);
 
         var 
+          channel = false,
           resultDOM = $("<div class='row result' />"),
           rowDOM = $("<div class='row' />").html(template.search(row));
 
+        if(row.convo_id != lastchannel) {
+          channel = lastchannel = row.convo_id;
+        }
+
         resultDOM.html(template.container({
+          channel: channel,
           row: rowDOM.html()
         })).appendTo("#results");
 
@@ -317,13 +332,24 @@ function showChat() {
     } else {
       $("#results").html("<h2>Woops, nothing found for '" + query + "'. Check the spelling?</h2>");
     }
-  })
+  });
+  setTimeout(function(){
+    ev.isset('convodb', function(d){
+      $(".channel-name").each(getChannel);
+    });
+  }, 1500);
 }
 
-ev('state', 'Chat');
-setInterval(function(){
-  if(window.location.hash.slice(1) != query) {
-    $("#search").val(window.location.hash.slice(1));
-    finderAlias();
-  }
-}, 100);
+
+$(function(){
+
+  $("#search").val(window.location.hash.slice(1));
+  ev('state', 'Chat');
+
+  setInterval(function(){
+    if(window.location.hash.slice(1) != query) {
+      $("#search").val(window.location.hash.slice(1));
+      finderAlias();
+    }
+  }, 100);
+});

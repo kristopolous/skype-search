@@ -84,6 +84,9 @@
     </script>
 
     <script type="text/template" id="Search-Container">
+      <% if (channel) { %>
+        <div class="channel-name"><%= channel %></div>
+      <% } %>
       <a class="btn expand"><i class="icon-chevron-down"></i></a>
       <div><%= row %></div>
     </script>

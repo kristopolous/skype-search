@@ -23,6 +23,9 @@ a { cursor: pointer }
   cursor: pointer;
   width:9em
 }
+.channel-name {
+  color:#ede;  
+}
 .channel span {
   box-shadow: 
     2px 2px 4px rgba(250,250,250,0.5) inset,
