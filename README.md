@@ -29,7 +29,7 @@ Features above:
  * The search terms are a boolean OR
 
 <blockquote>
-Note: Only the first *ONE THOUSAND* results; to try to save your browser from locking up due to some bad query.
+Note: Only the first 1,000 results are shown to try to save your browser from locking up due to some bad query.
 </blockquote>
 
 # Installation
