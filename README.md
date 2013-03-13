@@ -28,16 +28,20 @@ Features above:
  * If you click on the "Skype-Search" brand on the left, the search query will go away and then you can see just the logs of the rooms that you have selected.
  * The search terms are a boolean OR
 
-All you have to do is find a file called main.db, it's in your .Skype/username/ directory.  Now take a COPY (don't move it you fool) and drop it into the api directory.  Host this locally, unless you want the world to search your databases.
+<blockquote>
+Note: Only the first *ONE THOUSAND* results; to try to save your browser from locking up due to some bad query.
+</blockquote>
 
-If you wanted to be smarter, you could do something like a hardlink instead of a copy to make this always update.  But who would ever be that clever?
+# Installation
 
-Certainly not I.  Have fun.
+1. You should have a PHP-friendly stack (LAMP works).
+2. In your ~/.Skype/username/ directory there is a file named `main.db`, either
+  * copy this file into the API directory *~ OR ~*
+  * hard-link from your home-directory to the api directory.
 
-Oh yeah, I only show the first *ONE THOUSAND* results; to try to save your browser from locking up due to some bad query.
 
-## Here's some info
+## Miscellaneous Information
 
-* Edited messages are edited in the database. There is no record of its previous state (although there may be in the journal or other parts of what skype stores ...)
+* Edited messages are edited in the database. There is no record of its previous state (although there may be in the journal or other parts of what Skype stores ...)
 * Removed messages are the same deal.
-* Skype keeps changing its schema AND backend way of storing data. Older versions of skype (2.x) don't use sqlite3 at all for the db - but some asofyet unknown format.
+* Skype keeps changing its schema AND backend way of storing data. Older versions of Skype (2.x) don't use sqlite3 at all for the db - but some asofyet unknown format.
