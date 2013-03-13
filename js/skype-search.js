@@ -43,6 +43,7 @@ $(function(){
     container: _.template($("#Search-Container").html()),
     call: _.template($("#Call-Result").html()),
     channel: _.template($("#Channel-Item").html()),
+    channelHeader: _.template($("#Channel-Header").html()),
     room: _.template($("#Filter-Room").html())
   };
 
@@ -232,19 +233,22 @@ function showCalls() {
 }
 
 function Expand(ts, convo, el) {
-  $.getJSON("api/search.php?ts=" + ts + "&convo=" + convo, function(data) {
-    var rowDOM;
+  $.getJSON("api/search.php", {
+    ts: ts,
+    convo: convo
+  }, function(data) {
+    var 
+      rowDOM,
+      lastAuthor;
 
     $(el)
       .empty()
-      .removeClass('highlight')
-      .unbind('click')
       .hide();
 
     _.each(data, function(row) {
       if(!row) { return; }
       process(row);
-      rowDOM = $("<div class='row'>").html( template.search(row) );
+      rowDOM = $("<div>").html( template.search(row) );
       if(row.rawtimestamp == ts) {
         rowDOM.addClass("highlight").click(function(){
           $(this.parentNode).slideUp(function(){
@@ -279,7 +283,7 @@ function process(row) {
 }
 
 function showChat() {
-  var lastchannel;
+  var lastChannel;
 
   query = $("#search").val();
   window.location.hash = query;
@@ -301,24 +305,18 @@ function showChat() {
           resultDOM = $("<div class='row result' />"),
           rowDOM = $("<div class='row' />").html(template.search(row));
 
-        if(row.convo_id != lastchannel) {
-          channel = lastchannel = row.convo_id;
+        if(row.convo_id != lastChannel) {
+          lastChannel = row.convo_id;
+          $("#results").append(template.channelHeader({ channel: lastChannel}));
         }
 
         resultDOM.html(template.container({
-          channel: channel,
           row: rowDOM.html()
         })).appendTo("#results");
 
         $(".expand", resultDOM).click(function(){
           Expand(row.rawtimestamp, row.convo_id, $(this).next());
         })
-/*
-        resultDOM
-          .append(expand)
-          .append(rowDOM)
-          .appendTo("#results");
-*/
       });
     } else {
       $("#results").html("<h2>Woops, nothing found for '" + query + "'. Check the spelling?</h2>");

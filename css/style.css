@@ -1,5 +1,6 @@
 body {
  padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
+ color: #000;
 }
 #copy{
  text-align:center;
@@ -17,6 +18,7 @@ a { cursor: pointer }
 .members span {
   background:#434;
   color:#ede;  
+
   white-space: pre;
   padding:0.5em;
   margin:0.15em;
@@ -24,7 +26,8 @@ a { cursor: pointer }
   width:9em
 }
 .channel-name {
-  color:#ede;  
+  color: #fff;
+  text-indent: 1em;
 }
 .channel span {
   box-shadow: 
@@ -48,7 +51,7 @@ a { cursor: pointer }
 }
 .result {
   border-top: 1px solid #a9a;
-  margin: 1em 0;
+  margin: 0.5em 0;
 }
 .row > .row {
   margin-left: 0;
@@ -106,7 +109,6 @@ a { cursor: pointer }
   margin-right: 1em
 }
 .text { 
-  white-space: pre;
   font-size: 0.75em;
   line-height: 1.35em;
   font-family: monospace 
@@ -119,7 +121,7 @@ a { cursor: pointer }
   zoom: 0.5;
   position: absolute;
   top: 0;
-  left: -1em;
+  left: 0;
 }
 .filterable {
   cursor: pointer;
@@ -127,6 +129,15 @@ a { cursor: pointer }
 .filterable:hover {
   opacity: 0.85;
   box-shadow: 0 0 4px 4px #ccc;
+}
+.row.channel .channel-name{
+  min-height: 0;
+  padding: 0.25em 0;
+}
+.row.channel{
+  height: auto;
+  font-size: 0.85em;
+  margin-bottom: -0.60em;
 }
 partlist { display: none }
 partlist:after {

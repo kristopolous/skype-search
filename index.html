@@ -83,17 +83,20 @@
       <span class="label"><%= room %></span>
     </script>
 
+    <script type="text/template" id="Channel-Header">
+      <div class="row channel">
+      <div class="channel-name span12"><%= channel %></div>
+      </div>
+    </script>
+
     <script type="text/template" id="Search-Container">
-      <% if (channel) { %>
-        <div class="channel-name"><%= channel %></div>
-      <% } %>
       <a class="btn expand"><i class="icon-chevron-down"></i></a>
       <div><%= row %></div>
     </script>
 
     <script type="text/template" id="Search-Result">
       <div class="span2 author"><%= $.trim(from_dispname) %><span class='timestamp'><%= timestamp %></span></div>
-      <div class="span10 text"><%= body_xml %></div>
+      <div class="span10 text"><%= text(body_xml) %></div>
     </script>
     <!-- Le javascript
     ================================================== -->

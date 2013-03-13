@@ -18,9 +18,15 @@ Features above:
 Note: The text isn't actually ugly-ass-yellow. That's just for the screen shot.
 
 ## Crap, I can search sensibly!
-<img src=http://i.imgur.com/cIHy9gb.png>
+<img src=http://i.imgur.com/ePGIi5m.png>
 
-If you click on a timestamp then you get all messages +/- a 13 message window around the search context within the search room.
+Features above:
+
+ * If you click on the arrow next to the name you get all messages +/- a 13 message window around the search context within the search room.
+ * If you click on the room title, then you see only the messages from that room with respect to the search query
+ * You can search multiple rooms at once
+ * If you click on the "Skype-Search" brand on the left, the search query will go away and then you can see just the logs of the rooms that you have selected.
+ * The search terms are a boolean OR
 
 All you have to do is find a file called main.db, it's in your .Skype/username/ directory.  Now take a COPY (don't move it you fool) and drop it into the api directory.  Host this locally, unless you want the world to search your databases.
 

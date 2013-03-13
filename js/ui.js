@@ -52,3 +52,7 @@ function doDuration(num) {
 function doFractionalDuration(num) {
   return (num / 3600).toFixed(3);
 }
+
+function text(str) {
+  return str.replace(/\ /g, '&nbsp;');
+}
