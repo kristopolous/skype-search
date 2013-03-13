@@ -3,17 +3,27 @@ require('common.php');
 $fields = 'id, convo_id, timestamp, from_dispname, body_xml';
 $pre = "select $fields from Messages";
 
-if(!empty($_GET['q'])) {
+if(
+    (!empty($_GET['q'])) ||
+    (!empty($_GET['rooms']))
+) {
   // search works better when it's an and clause really as opposed to contiguous words.
   // at least that's how I work... 
+  $findList = Array();
+
   if(!empty($_GET['rooms'])) {
-    $room = "and convo_id in (" . implode(',', $_GET['rooms']) . ")";
-  } else {
-    $room = "";
+    $findList[] = "convo_id in (" . implode(',', $_GET['rooms']) . ")";
+  } 
+
+  if(!empty($_GET['q'])) {
+    $queryList = explode(' ', addslashes($_GET['q']));
+    $findList[] = "body_xml like '%" . implode("%' and body_xml like '%", $queryList) . "%'"; 
   }
 
-  $queryList = explode(' ', addslashes($_GET['q']));
-  $qres = $db->query("$pre where body_xml like '%" . implode("%' and body_xml like '%", $queryList) . "%' $room order by timestamp desc limit 1000");
+  $finder = "where " . implode(' and ', $findList);
+
+  $qres = $db->query("$pre $finder order by timestamp desc limit 1000");
+
   while(($res[] = prune($qres)) != null);
 } else {
 

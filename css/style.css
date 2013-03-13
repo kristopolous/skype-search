@@ -129,6 +129,9 @@ a { cursor: pointer }
   box-shadow: 0 0 4px 4px #ccc;
 }
 partlist { display: none }
+partlist:after {
+  content: "Phone call"
+}
 /*
 .dropdown-menu *,
 .dropdown-menu li, .channel span, .members span, .label {

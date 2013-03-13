@@ -286,7 +286,7 @@ function showChat() {
 
   re = new RegExp(">(.*)(" + query + ")(.*)<", 'ig');
 
-  $.getJSON("api/search.php?", {
+  $.getJSON("api/search.php", {
     q: query,
     rooms: ev('channelIds')
   }, function(data) {
@@ -324,6 +324,8 @@ function showChat() {
       $("#results").html("<h2>Woops, nothing found for '" + query + "'. Check the spelling?</h2>");
     }
   });
+  window.scrollTo(0,0);
+
   setTimeout(function(){
     ev.isset('convodb', function(d){
       $(".channel-name").each(getChannel);
