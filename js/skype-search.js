@@ -86,16 +86,7 @@ function getChannel(){
   this.innerHTML = channel;
   this.style.background = colorMap[id];
 
-  $(this).addClass('convo-' + id).hover(
-    function() { 
-      $(".convo-" + id).addClass('hover'); 
-      $(".convo-" + id).parent().parent().addClass('hover'); 
-    },
-    function() { 
-      $(".convo-" + id).removeClass('hover'); 
-      $(".convo-" + id).parent().parent().removeClass('hover'); 
-    }
- ).click(function(){
+  $(this).addClass('convo-' + id).addClass('filterable').click(function(){
    ev("channelList", [channel]);
  });
 }

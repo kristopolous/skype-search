@@ -121,6 +121,13 @@ a { cursor: pointer }
   top: 0;
   left: -1em;
 }
+.filterable {
+  cursor: pointer;
+}
+.filterable:hover {
+  opacity: 0.85;
+  box-shadow: 0 0 4px 4px #ccc;
+}
 partlist { display: none }
 /*
 .dropdown-menu *,
