@@ -18,7 +18,7 @@ Features above:
 Note: The text isn't actually ugly-ass-yellow. That's just for the screen shot.
 
 ## Crap, I can search sensibly!
-<img src=http://i.imgur.com/ePGIi5m.png>
+<img src=http://i.imgur.com/yiVjDFX.png>
 
 Features above:
 
