@@ -232,6 +232,15 @@ function showCalls() {
   });
 }
 
+var wait = {
+  on: function(){
+    $("#waiter").css('display','block');
+  },
+  off: function(){
+    $("#waiter").css('display','none');
+  }
+}
+
 function Expand(ts, convo, el) {
   $.getJSON("api/search.php", {
     ts: ts,
@@ -290,11 +299,13 @@ function showChat() {
 
   re = new RegExp(">(.*)(" + query + ")(.*)<", 'ig');
 
+  $("#results").empty();
+  wait.on();
   $.getJSON("api/search.php", {
     q: query,
     rooms: ev('channelIds')
   }, function(data) {
-    $("#results").empty();
+    wait.off();
     if(data.length) {
       _.each(data, function(row) {
         if(!row) { return; }
