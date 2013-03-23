@@ -1,5 +1,6 @@
 #!/bin/bash
 which sqlite3 > /dev/null
+
 if [ $? -ne 0 ]; then
   echo "sqlite3 must be on here. Please do that first"
   echo "On ubuntu I need to do the following:"
