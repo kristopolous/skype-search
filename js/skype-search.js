@@ -205,6 +205,7 @@ ev({
   state: function(state) {
     if(state == "Calls") {
       $("#search").hide();
+      $("#instructions").hide();
       finder = showCalls;
     } else { // chat
       $("#search").show();
@@ -299,6 +300,11 @@ function showChat() {
 
   re = new RegExp(">(.*)(" + query + ")(.*)<", 'ig');
 
+  if(window.location.hash.length == 0){
+    return;
+  } else {
+    $("#instructions").css('display','none');
+  }
   $("#results").empty();
   wait.on();
   $.getJSON("api/search.php", {
