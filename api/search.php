@@ -41,7 +41,7 @@ if(
   ) as $tuple) {
     list($oper, $order) = $tuple;
 
-    $qres = $db->query("$pre where timestamp $oper $ts and convo_id = $convo order by timestamp $order limit 13");
+    $qres = $db->query("$pre where timestamp $oper $ts and convo_id = $convo order by timestamp $order limit " . (13 * $_GET['level']));
     while(($res[] = prune($qres)) != null);
 
     if($oper == '<') {

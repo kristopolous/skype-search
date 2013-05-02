@@ -242,10 +242,12 @@ var wait = {
   }
 }
 
-function Expand(ts, convo, el) {
+function Expand(ts, convo, el, button) {
+  button.level = (button.level || 0) + 1;
   $.getJSON("api/search.php", {
     ts: ts,
-    convo: convo
+    convo: convo,
+    level: button.level
   }, function(data) {
     var 
       rowDOM,
@@ -339,7 +341,7 @@ function showChat() {
         })).appendTo("#results");
 
         $(".expand", resultDOM).click(function(){
-          Expand(row.rawtimestamp, row.convo_id, $(this).next());
+          Expand(row.rawtimestamp, row.convo_id, $(this).next(), this);
         })
       });
     } else {
