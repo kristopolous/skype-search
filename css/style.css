@@ -82,6 +82,9 @@ a { cursor: pointer }
 .row-fluid .expanded [class*="span"] {
   min-height: 0px;
 }
+.expanded > div {
+  line-height: 16px;
+}
 .expanded .author {
   line-height: inherit;
 }
