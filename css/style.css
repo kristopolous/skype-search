@@ -76,6 +76,19 @@ a { cursor: pointer }
   font-size: 0.8em;
   padding-left: 1.25em;
 }
+.expanded .timestamp {
+  display: none;
+}
+.row-fluid .expanded [class*="span"] {
+  min-height: 0px;
+}
+.expanded .author {
+  line-height: inherit;
+}
+.expanded .text {
+  line-height: inherit;
+  min-height: 0;
+}
 
 .call .timestamp,
 .call .duration { 

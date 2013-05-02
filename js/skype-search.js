@@ -253,7 +253,8 @@ function Expand(ts, convo, el) {
 
     $(el)
       .empty()
-      .hide();
+      .hide()
+      .addClass("expanded");
 
     _.each(data, function(row) {
       if(!row) { return; }
@@ -284,12 +285,18 @@ function process(row) {
 
   row.rawtimestamp = row.timestamp;
   row.timestamp = (new Date(row.timestamp * 1000))
-    .toLocaleString()
-    .split(' ')
-    .slice(0, -1)
-    .reverse()
-    .join(' ')
-    .replace(/GMT.*/, '');
+  row.timestamp = [
+    [
+      row.timestamp.getUTCFullYear(),
+      (row.timestamp.getUTCMonth() + 100).toString().slice(1),
+      (row.timestamp.getUTCDate() + 100).toString().slice(1)
+    ].join('/'),
+
+    [
+      row.timestamp.getUTCHours(),
+      row.timestamp.getUTCMinutes()
+    ].join(':')
+  ].join(' ');
 }
 
 function showChat() {
