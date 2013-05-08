@@ -36,7 +36,6 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="brand" href="#">Skype Search</a>
           <form class="navbar-search pull-left" action=javascript:finderAlias()>
             <input type="text" id="search" class="search-query" placeholder="Search">
           </form>
@@ -47,8 +46,16 @@
           <div class="tabbable tabs-left">
             <form class="navbar-search pull-left">
               <input data-provide="typeahead" type="text" id="room" class="search-query" placeholder="Room Filter">
-              <button id="showAll" disabled onclick="filterClear()" class='btn'>Show All</button>
+              <button id="showAll" disabled onclick="filterClear()" class='btn'>All</button>
             </form>
+<!--
+            <form class="navbar-dates pull-left">
+              <div class="input-append date" id="dp3" data-date-format="yyyy-mm-dd">
+                <input class="span2" size="16" type="text">
+                <span class="add-on"><i class="icon-th"></i></span>
+              </div>
+            </form>
+-->
           </div>
           <div class="container" id="filterList-container">
             <span id="filterList"></span>

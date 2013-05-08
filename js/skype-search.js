@@ -290,7 +290,7 @@ function process(row) {
   row.timestamp = [
     [
       row.timestamp.getUTCFullYear(),
-      (row.timestamp.getUTCMonth() + 100).toString().slice(1),
+      (row.timestamp.getUTCMonth() + 101).toString().slice(1),
       (row.timestamp.getUTCDate() + 100).toString().slice(1)
     ].join('/'),
 
