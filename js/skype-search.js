@@ -33,7 +33,22 @@ ev.on("channelList", function(what){
   });
 });
 
-function filterClear(){
+function timeConvert(ts) {
+  return [
+    [
+      ts.getUTCFullYear(),
+      (ts.getMonth() + 101).toString().slice(1),
+      (ts.getDate() + 100).toString().slice(1)
+    ].join('/'),
+
+    [
+      (ts.getHours() + 100).toString().slice(1),
+      (ts.getMinutes() + 100).toString().slice(1)
+    ].join(':')
+  ].join(' ');
+}
+
+function filterClear() {
   ev("channelList", []);
 }
 
@@ -128,13 +143,7 @@ ev.setter('calls', function(done) {
 
       row.fractional_duration = doFractionalDuration(row.duration_real);
 
-      row.begin_timestamp = (new Date(row.begin_timestamp * 1000)).toLocaleString().split(' ').slice(0,-1)
-      row.begin_timestamp = row.begin_timestamp.join(' ').replace(/GMT.*/, '').replace(/\s$/,'');
-      var temp = row.begin_timestamp.split(' '),
-          time = temp.pop(),
-          hour = time.split(':').shift();
-
-      temp.push( time );
+      row.begin_timestamp = timeConvert(new Date(row.begin_timestamp * 1000));
 
       // modern skype (4.1.0.20-linux) doesn't seem to fill this out any more :-\.
       if(!row.current_video_audience) {
@@ -286,19 +295,7 @@ function process(row) {
     .slice(1, -1);
 
   row.rawtimestamp = row.timestamp;
-  row.timestamp = (new Date(row.timestamp * 1000))
-  row.timestamp = [
-    [
-      row.timestamp.getUTCFullYear(),
-      (row.timestamp.getUTCMonth() + 101).toString().slice(1),
-      (row.timestamp.getUTCDate() + 100).toString().slice(1)
-    ].join('/'),
-
-    [
-      row.timestamp.getUTCHours(),
-      row.timestamp.getUTCMinutes()
-    ].join(':')
-  ].join(' ');
+  row.timestamp = timeConvert(new Date(row.timestamp * 1000));
 }
 
 function showChat() {
