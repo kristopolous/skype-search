@@ -133,6 +133,25 @@ ev.setter('calls', function(done) {
   $.getJSON("api/calls.php", function(data) {
     var db = DB();
 
+    _.each(data, function(which) {
+      var xml = $($.parseXML(which.body_xml));
+
+      which.duration = 0;
+
+      which.conv_dbid = which.convo_id;
+      delete which.convo_id;
+      which.participants = Array.prototype.slice.call((xml.find('part')).map(function(el) {
+
+        which.duration = Math.max(
+          parseInt(
+            $(this).find('duration').text()
+          ), 
+          which.duration);
+
+        return this.getAttribute('identity');
+      }));
+
+    });
     db.insert(data);
 
     db.update(function(row){
@@ -143,16 +162,8 @@ ev.setter('calls', function(done) {
 
       row.fractional_duration = doFractionalDuration(row.duration_real);
 
-      row.begin_timestamp = timeConvert(new Date(row.begin_timestamp * 1000));
-
-      // modern skype (4.1.0.20-linux) doesn't seem to fill this out any more :-\.
-      if(!row.current_video_audience) {
-        row.current_video_audience = "";
-      } else {
-        row.current_video_audience = row.current_video_audience.replace(/^\s+/, '').replace(/\s+$/, '');
-
-        row.current_video_audience = '<span>' + row.current_video_audience.split(/\s+/).sort().join('</span><span>') + '</span>';
-      }
+      row.begin_timestamp = timeConvert(new Date(row.timestamp * 1000));
+      row.current_video_audience = '<span>' + row.participants.sort().join('</span><span>') + '</span>';
     });
 
     // This is the set with calls

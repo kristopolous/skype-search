@@ -2,12 +2,11 @@
 require('common.php');
 
 $qres = $db->query("select 
-  duration, 
-  begin_timestamp,
-  current_video_audience, 
-  conv_dbid 
-from Calls 
-  order by begin_timestamp desc limit 1000");
+  id, convo_id, chatname, author, from_dispname,
+  timestamp, body_xml, call_guid
+from Messages
+  where chatmsg_type=18
+  order by timestamp desc limit 1000");
 
 while(($res[] = prune($qres)) != null);
 
