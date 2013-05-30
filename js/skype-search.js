@@ -10,6 +10,7 @@ var
     channelList: [],
     channelIds: []
   }),
+  nameList = [],
   nameMap = {},
   colorMap = {};
 
@@ -76,16 +77,32 @@ $(function(){
         } else {
           set = _.difference(ev('callList'), ev('channelList'));
         }
-        return _.uniq(set);
+        return _.map(_.uniq(set), function(which) { 
+          return "r: " + which;
+        }).concat( _.map(nameList, function(which) {
+          return "u: " + which;
+        })).sort();
       },
       updater: function(what) {
-        ev.setadd("channelList", what);
+        var 
+          parts = what.split(':'),
+          type = parts[0],
+          thing = $.trim(parts[1]);
+
+        if(type == 'r') {
+          ev.setadd("channelList", thing);
+        } else {
+          ev.setadd("userList", thing);
+        }
       }
     })
   });
 
   $.getJSON("api/whois.php", function(data) {
     _.each(data, function(value, key) {
+      if(value.fullname || value.skypename) {
+        nameList.push(value.fullname || value.skypename);
+      }
       nameMap[value.skypename] = value.fullname;
       colorMap[value.skypename] = nextColor();
     });
@@ -367,7 +384,7 @@ function showChat() {
 
 
 $(function(){
-
+  $('body').css('display','block');
   $("#search").val(window.location.hash.slice(1));
   ev('state', 'Chat');
 
