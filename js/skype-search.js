@@ -183,6 +183,8 @@ ev.setter('calls', function(done) {
       row.current_video_audience = '<span>' + row.participants.sort().join('</span><span>') + '</span>';
     });
 
+    db.remove({duration: false});
+
     // This is the set with calls
     ev.set(
       "callList", 
