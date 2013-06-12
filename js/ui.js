@@ -1,6 +1,20 @@
 var 
   h = 0, s = 0.3, v = 0.2;
 
+function timeConvert(ts) {
+  return [
+    [
+      ts.getUTCFullYear(),
+      (ts.getMonth() + 101).toString().slice(1),
+      (ts.getDate() + 100).toString().slice(1)
+    ].join('/'),
+
+    [
+      (ts.getHours() + 100).toString().slice(1),
+      (ts.getMinutes() + 100).toString().slice(1)
+    ].join(':')
+  ].join(' ');
+}
 function hsv2rgb(h, s, v) {
   h = (h % 1 + 1) % 1; // wrap hue
 

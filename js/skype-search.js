@@ -34,21 +34,6 @@ ev.on("channelList", function(what){
   });
 });
 
-function timeConvert(ts) {
-  return [
-    [
-      ts.getUTCFullYear(),
-      (ts.getMonth() + 101).toString().slice(1),
-      (ts.getDate() + 100).toString().slice(1)
-    ].join('/'),
-
-    [
-      (ts.getHours() + 100).toString().slice(1),
-      (ts.getMinutes() + 100).toString().slice(1)
-    ].join(':')
-  ].join(' ');
-}
-
 function filterClear() {
   ev("channelList", []);
 }
@@ -92,7 +77,7 @@ $(function(){
         if(type == 'r') {
           ev.setadd("channelList", thing);
         } else {
-          ev.setadd("userList", thing);
+          ev.setadd("userList", nameMap[thing]);
         }
       }
     })
@@ -103,7 +88,12 @@ $(function(){
       if(value.fullname || value.skypename) {
         nameList.push(value.fullname || value.skypename);
       }
-      nameMap[value.skypename] = value.fullname;
+      nameMap[value.skypename] = value.fullname || value.skypename;
+
+      if(value.fullname) {
+        nameMap[value.fullname] = value.skypename;
+      }
+
       colorMap[value.skypename] = nextColor();
     });
   });
@@ -120,8 +110,8 @@ function getChannel(){
   this.style.background = colorMap[id];
 
   $(this).addClass('convo-' + id).addClass('filterable').click(function(){
-   ev("channelList", [channel]);
- });
+    ev("channelList", [channel]);
+  });
 }
 
 function getName(){
@@ -215,6 +205,10 @@ function state(el) {
 }
 
 ev({
+  userList: function(what) {
+    finderAlias();
+  },
+
   channelList: function(what) {
     if(ev('channelList').length) {
       var idList = ev('convodb').find({
@@ -345,7 +339,8 @@ function showChat() {
   wait.on();
   $.getJSON("api/search.php", {
     q: query,
-    rooms: ev('channelIds')
+    rooms: ev('channelIds'),
+    users: ev('userList')
   }, function(data) {
     wait.off();
     if(data.length) {

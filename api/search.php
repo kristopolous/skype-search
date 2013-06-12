@@ -5,14 +5,19 @@ $pre = "select $fields from Messages";
 
 if(
     (!empty($_GET['q'])) ||
-    (!empty($_GET['rooms']))
+    (!empty($_GET['rooms'])) ||
+    (!empty($_GET['users']))
 ) {
   // search works better when it's an and clause really as opposed to contiguous words.
   // at least that's how I work... 
   $findList = Array();
 
   if(!empty($_GET['rooms'])) {
-    $findList[] = "convo_id in (" . implode(',', $_GET['rooms']) . ")";
+    $findList[] = "convo_id in (" . mysql_real_escape_string(implode(',', $_GET['rooms'])) . ")";
+  } 
+
+  if(!empty($_GET['users'])) {
+    $findList[] = "author in (\"" . mysql_real_escape_string(implode('","', $_GET['users'])) . "\")";
   } 
 
   if(!empty($_GET['q'])) {
