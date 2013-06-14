@@ -14,7 +14,7 @@ var
   nameMap = {},
   colorMap = {};
 
-ev.on("channelList", function(what){
+ev(["channelList", 'userList'], function(what, meta){
   $("#filterList").empty();
 
   document.getElementById("showAll")[
@@ -22,15 +22,17 @@ ev.on("channelList", function(what){
     "Attribute"
   ]("disabled", true);
 
-  _.each(what, function(filter) {
-    $(template.room({
-      room: filter
-    })).click(function(){
-      ev.setdel("channelList", this.innerHTML);
-    }).hover(
-      function(){ $(this).addClass('label-inverse'); },
-      function(){ $(this).removeClass('label-inverse'); }
-    ).appendTo("#filterList");
+  _.each(['channelList', 'userList'], function(key) {
+    _.each(ev(key), function(filter) {
+      $(template.room({
+        room: filter
+      })).click(function(){
+        ev.setdel(key, this.innerHTML);
+      }).hover(
+        function(){ $(this).addClass('label-inverse'); },
+        function(){ $(this).removeClass('label-inverse'); }
+      ).appendTo("#filterList");
+    })
   });
 });
 
