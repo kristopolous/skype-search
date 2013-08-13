@@ -17,7 +17,7 @@ if(
   } 
 
   if(!empty($_GET['users'])) {
-    $findList[] = "author in (\"" . mysql_real_escape_string(implode('","', $_GET['users'])) . "\")";
+    $findList[] = "author in (\"" . implode('","', $_GET['users']) . "\")";
   } 
 
   if(!empty($_GET['q'])) {
