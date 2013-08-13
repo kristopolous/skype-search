@@ -31,8 +31,8 @@ ev(["channelList", 'userList'], function(what, meta){
   _.each(['channelList', 'userList'], function(key) {
     _.each(ev(key), function(filter) {
       $(template.room({
-        room: nameMap[filter],
-        type: {'channelList':'', 'userList':'label-info'}[key]
+        room: nameMap[filter] || filter,
+        type: {'channelList':'label-warning', 'userList':'label-info'}[key]
       })).click(function(){
         ev.setdel(key, filter);
       }).hover(swap, swap).appendTo("#filterList");
