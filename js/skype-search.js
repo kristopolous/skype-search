@@ -14,6 +14,12 @@ var
   nameMap = {},
   colorMap = {};
 
+function swap(){
+  var slosh = $(this).attr('hover');
+  $(this).attr({'hover': $(this).attr('class')});
+  $(this).attr({'class': slosh});
+}
+
 ev(["channelList", 'userList'], function(what, meta){
   $("#filterList").empty();
 
@@ -25,13 +31,11 @@ ev(["channelList", 'userList'], function(what, meta){
   _.each(['channelList', 'userList'], function(key) {
     _.each(ev(key), function(filter) {
       $(template.room({
-        room: filter
+        room: nameMap[filter],
+        type: {'channelList':'', 'userList':'label-info'}[key]
       })).click(function(){
-        ev.setdel(key, this.innerHTML);
-      }).hover(
-        function(){ $(this).addClass('label-inverse'); },
-        function(){ $(this).removeClass('label-inverse'); }
-      ).appendTo("#filterList");
+        ev.setdel(key, filter);
+      }).hover(swap, swap).appendTo("#filterList");
     })
   });
 });
