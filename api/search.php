@@ -1,4 +1,4 @@
-<?
+<?php
 require('common.php');
 $fields = 'id, convo_id, timestamp, from_dispname, body_xml';
 $pre = "select $fields from Messages";

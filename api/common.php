@@ -1,4 +1,4 @@
-<?
+<?php
 $db = new SQLite3("main.db");
 // SQLite returns both an associative array and a numbered array
 // that is to say that I get

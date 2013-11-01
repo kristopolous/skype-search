@@ -1,4 +1,4 @@
-<?
+<?php
 require('common.php');
 
 $qres = $db->query("select 
