@@ -15,6 +15,7 @@ function timeConvert(ts) {
     ].join(':')
   ].join(' ');
 }
+
 function hsv2rgb(h, s, v) {
   h = (h % 1 + 1) % 1; // wrap hue
 

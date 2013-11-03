@@ -30,24 +30,31 @@
 
     <div class="navbar navbar-inverse navbar-fixed-top">
       <div class="navbar-inner">
-        <div class="container">
           <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
+         
           <form class="navbar-search pull-left" action=javascript:finderAlias()>
             <input type="text" id="search" class="search-query" placeholder="Search">
           </form>
-          <ul class="nav nav-pills">
+          
+          <ul class="nav">
             <li><a onclick="state(this)">Calls</a></li>
             <li class="active"><a onclick="state(this)">Chat</a></li>
           </ul>
-          <div class="tabbable tabs-left">
-            <form class="navbar-search pull-left">
-              <input data-provide="typeahead" type="text" id="room" class="search-query" placeholder="Room Filter">
-              <button id="showAll" disabled onclick="filterClear()" class='btn'>All</button>
-            </form>
+
+          <form class="navbar-search pull-left">
+            <input data-provide="typeahead" type="text" id="room" class="search-query" placeholder="Room Filter">
+          </form>
+
+          <button 
+            disabled
+            class="btn" 
+            type="button" 
+            id="showAll" 
+            onclick="filterClear()">All</button>
 <!--
             <form class="navbar-dates pull-left">
               <div class="input-append date" id="dp3" data-date-format="yyyy-mm-dd">
@@ -56,11 +63,9 @@
               </div>
             </form>
 -->
-          </div>
           <div class="container" id="filterList-container">
             <span id="filterList"></span>
           </div>
-        </div>
       </div>
     </div>
 
