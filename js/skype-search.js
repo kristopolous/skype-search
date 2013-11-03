@@ -3,6 +3,8 @@ var
   re, 
   query,
 
+  // This is an aliased function that can move around depending
+  // on whether we are in the call or chat mode.
   finder,
   finderAlias = function() { if(finder) { finder() } },
 
@@ -45,41 +47,76 @@ function filterClear() {
 }
 
 $(function(){
-  template = {
-    search: _.template($("#Search-Result").html()),
-    container: _.template($("#Search-Container").html()),
-    call: _.template($("#Call-Result").html()),
-    channel: _.template($("#Channel-Item").html()),
-    channelHeader: _.template($("#Channel-Header").html()),
-    room: _.template($("#Filter-Room").html())
-  };
+  _.each([
+    [ "search", "Search-Result" ],
+    [ "container", "Search-Container" ],
+    [ "call", "Call-Result" ],
+    [ "channel", "Channel-Item" ],
+    [ "channelHeader", "Channel-Header" ],
+    [ "room", "Filter-Room" ]
+  ], function(tuple) {
+    template[tuple.shift()] = _.template(
+      $("#" + tuple.shift() ).html()
+    );
+  });
 
   $.getJSON("api/conversations.php", function(data) {
+    // Make sure that we give a unique color to all the 
+    // conversations that there have been.
     _.each(data,function(what) {
       colorMap[what.id] = nextColor();
     });
+
+    // Put the convo database in a global ev object - some
+    // parts of the code are waiting for this
     ev.set('convodb', DB(data));
+
+    // This is of course, assumed to be static for the duration
+    // of web application runtime.
     var channels = ev('convodb').select('displayname');
+
     $("#room").typeahead({
       source: function(){ 
         var set;
+
+        // Make sure that we don't show options that are already
+        // selected.
         if(ev('state') == 'Chat') {
           set = _.difference(channels, ev("channelList"));
         } else {
           set = _.difference(ev('callList'), ev('channelList'));
         }
+
+        // There's two different kind of filters: either what a (u)ser
+        // has said or a (r)oom that it was said in.
         return _.map(_.uniq(set), function(which) { 
           return "r: " + which;
         }).concat( _.map(nameList, function(which) {
           return "u: " + which;
         })).sort();
       },
+
       updater: function(what) {
+        // Since we have a crappy little type system,
+        // we have to use the string value to determine
+        // whether the person was in a room or a user.
         var 
           parts = what.split(':'),
-          type = parts[0],
-          thing = $.trim(parts[1]);
 
+          // Since a colon is part of a valid channel name, 
+          // we have to shift off the stack to determine
+          // the type
+          type = parts.shift(),
+
+          // and then reassemble the rest of the parts back
+          // together, if there are more than one of course.
+          thing = $.trim(parts.join(':'));
+
+        // Now we use this to determine whether it was a room
+        // or a user.  If it's a user, then we use their real
+        // skype username, as the aliased name such as "Joe Smith"
+        // can collide.  Of course, we don't handle that at all very well
+        // throughout the code and will break on such collisions.
         if(type == 'r') {
           ev.setadd("channelList", thing);
         } else {
@@ -243,8 +280,7 @@ ev({
 
   state: function(state) {
     if(state == "Calls") {
-      $("#search").hide();
-      $("#instructions").hide();
+      $("#search, #instructions").hide();
       finder = showCalls;
     } else { // chat
       $("#search").show();
