@@ -425,6 +425,7 @@ function showChat() {
 $(function(){
   $('body').css('display','block');
   $("#search").val(window.location.hash.slice(1));
+//  $("#dp3").datepicker();
   ev('state', 'Chat');
 
   setInterval(function(){

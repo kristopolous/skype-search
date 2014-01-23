@@ -22,6 +22,28 @@ if(
 
   if(!empty($_GET['q'])) {
     $queryList = explode(' ', addslashes($_GET['q']));
+
+    // Sometimes you want to search a complete word, like "inc" and not "include"
+    // You'd like a trailing space on it to make this possible.
+    // If the first token is empty
+    if(strlen($queryList[0]) == 0) {
+      // we shift it off
+      array_shift($queryList);
+
+      // and prepend a space.
+      $queryList[0] = ' ' . $queryList[0];
+    }
+
+    if(strlen(end($queryList)) == 0) {
+
+      // Do the same thing in the other direction
+      $space = array_pop($queryList);
+
+      $token = array_pop($queryList);
+      
+      array_push($queryList, $token . ' ');
+    } 
+
     $findList[] = "body_xml like '%" . implode("%' and body_xml like '%", $queryList) . "%'"; 
   }
 
