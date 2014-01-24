@@ -22,7 +22,12 @@ function swap(){
   $(this).attr({'class': slosh});
 }
 
-ev(["channelList", 'userList'], function(what, meta){
+ev([
+  "notUserList", 
+  "notChannelList", 
+  "userList",
+  "channelList"
+  ], function(what, meta){
   $("#filterList").empty();
 
   document.getElementById("showAll")[
@@ -79,6 +84,13 @@ $(function(){
       source: function(){ 
         var set;
 
+        this.negate = false;
+        // negation search
+        if (this.query.substr(0,1) == '-') {
+          this.negate = true;
+          this.query = this.query.slice(1);
+        }
+
         // Make sure that we don't show options that are already
         // selected.
         if(ev('state') == 'Chat') {
@@ -97,6 +109,7 @@ $(function(){
       },
 
       updater: function(what) {
+
         // Since we have a crappy little type system,
         // we have to use the string value to determine
         // whether the person was in a room or a user.
