@@ -23,8 +23,6 @@ function swap(){
 }
 
 ev([
-  "notUserList", 
-  "notChannelList", 
   "userList",
   "channelList"
   ], function(what, meta){
@@ -84,10 +82,10 @@ $(function(){
       source: function(){ 
         var set;
 
-        this.negate = false;
+        this.include = true;
         // negation search
         if (this.query.substr(0,1) == '-') {
-          this.negate = true;
+          this.include = false;
           this.query = this.query.slice(1);
         }
 
@@ -109,7 +107,6 @@ $(function(){
       },
 
       updater: function(what) {
-
         // Since we have a crappy little type system,
         // we have to use the string value to determine
         // whether the person was in a room or a user.
@@ -131,9 +128,9 @@ $(function(){
         // can collide.  Of course, we don't handle that at all very well
         // throughout the code and will break on such collisions.
         if(type == 'r') {
-          ev.setadd("channelList", thing);
+          ev.setadd("channelList", ['-','+'][ +this.include ] + thing);
         } else {
-          ev.setadd("userList", nameMap[thing]);
+          ev.setadd("userList", ['-','+'][ +this.include ] + nameMap[thing]);
         }
       }
     })
@@ -267,9 +264,44 @@ ev({
 
   channelList: function(what) {
     if(ev('channelList').length) {
-      var idList = ev('convodb').find({
-        displayname: DB.isin(ev('channelList'))
-      }).select('id');
+
+      // First we find the convo id in the filter list
+      var 
+      idMap = ev('convodb').find({
+        displayname: DB.isin(
+          // while truncating whether we want to include or
+          // exclude the item.
+          ev('channelList').map(
+            function(m) { 
+              return m.slice(1); 
+            }
+          )
+        )
+        // Then we group it all by the display name, which
+        // will correspond to the human readable names
+      }).group('displayname'),
+
+      // The idList we send off to the api will have a sign bit
+      // on whether it should be included or excluded from the search.
+      // 
+      // We get this by mapping the selected items in the filter,
+      // (1) removing the sign bit, (2) looking up the id from the
+      // map created above, and then (3) combining them
+      //
+      // (3)
+      idList = ev('channelList').map(function(name) {
+              // (1)               (2)
+        return name.substr(0, 1) + idMap[ name.slice(1) ][0].id; 
+      });
+
+      ev('+channelIds', _.map(
+        _.filter(idList, function(m) { return parseInt(m) > 0 }),
+        function(m) { return m.slice(1) }
+      ));
+      ev('-channelIds', _.map(
+        _.filter(idList, function(m) { return parseInt(m) < 0 }),
+        function(m) { return m.slice(1) }
+      ));
       ev('channelIds', idList);
     } else {
       ev('channelIds', []);
@@ -394,7 +426,8 @@ function showChat() {
   wait.on();
   $.getJSON("api/search.php", {
     q: query,
-    rooms: ev('channelIds'),
+    rooms: ev('+channelIds'),
+    notRooms: ev('-channelIds'),
     users: ev('userList')
   }, function(data) {
     wait.off();
