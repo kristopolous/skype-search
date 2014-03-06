@@ -130,6 +130,21 @@ $(function(){
         })).sort();
       },
 
+      matcher: function(item) {
+        var 
+          partList = this.query.toLowerCase().replace(/[^\w]/,' ').replace(/\s+/, ' ').split(' '),
+          result = true;
+
+        item = item.toLowerCase();
+
+        _.each(partList, function(part) {
+          if(part.length) {
+            result &= item.search(part) > -1;
+          }
+        });
+        return result;
+      },
+
       updater: function(what) {
         // Since we have a crappy little type system,
         // we have to use the string value to determine
