@@ -23,7 +23,8 @@ function swap(){
 }
 
 ev([
-  "userList",
+  "+userList",
+  "-userList",
   "channelList"
   ], function(what, meta){
   $("#filterList").empty();
@@ -33,11 +34,15 @@ ev([
     "Attribute"
   ]("disabled", true);
 
-  _.each(['channelList', 'userList'], function(key) {
+  _.each(['channelList', '-userList', '+userList'], function(key) {
     _.each(ev(key), function(filter) {
       $(template.room({
         room: nameMap[filter] || filter,
-        type: {'channelList':'label-warning', 'userList':'label-info'}[key]
+        type: {
+          'channelList':'label-warning', 
+          '-userList':'label-info',
+          '+userList':'label-info'
+        }[key]
       })).click(function(){
         ev.setdel(key, filter);
       }).hover(swap, swap).appendTo("#filterList");
@@ -130,7 +135,7 @@ $(function(){
         if(type == 'r') {
           ev.setadd("channelList", ['-','+'][ +this.include ] + thing);
         } else {
-          ev.setadd("userList", ['-','+'][ +this.include ] + nameMap[thing]);
+          ev.setadd(['-','+'][ +this.include ] + "userList", nameMap[thing]);
         }
       }
     })
@@ -258,7 +263,10 @@ function state(el) {
 }
 
 ev({
-  userList: function(what) {
+  '+userList': function(what) {
+    finderAlias();
+  },
+  '-userList': function(what) {
     finderAlias();
   },
 
@@ -428,7 +436,8 @@ function showChat() {
     q: query,
     rooms: ev('+channelIds'),
     notRooms: ev('-channelIds'),
-    users: ev('userList')
+    users: ev('+userList'),
+    notUsers: ev('-userList')
   }, function(data) {
     wait.off();
     if(data.length) {
