@@ -49,6 +49,14 @@ A map of skype-names to human-readable names is created in nameMap.  This is a t
 Exist.  This is nice if skype screws up and starts giving you a username and you don't know who that person is.  (You can also
 figure this out through the skype search feature in the client.)
 
+You can see when people joined or left by searching for
+
+    !join (username or leave empty)
+    !kick (username or leave empty)
+
+Here's an example:
+<img src=http://i.imgur.com/mVPUhxr.png>
+
 ## Miscellaneous Information
 
 * Edited messages are edited in the database. There is no record of its previous state (although there may be in the journal or other parts of what Skype stores ...)
