@@ -39,6 +39,15 @@ Note: Only the first 1,000 results are shown to try to save your browser from lo
   * copy this file into the API directory *~ OR ~*
   * hard-link from your home-directory to the api directory.
 
+## Hacks
+
+A map of skype-names to human-readable names is created in nameMap.  This is a two-way map.  That's to say that both
+
+    { 'username': 'real name'}
+    { 'real name': 'username' }
+
+Exist.  This is nice if skype screws up and starts giving you a username and you don't know who that person is.  (You can also
+figure this out through the skype search feature in the client.)
 
 ## Miscellaneous Information
 
