@@ -10,7 +10,11 @@ var
 
   ev = EvDa({
     channelList: [],
-    channelIds: []
+    channelIds: [],
+    "+userList": [],
+    "-userList": [],
+    "+channelIds": [],
+    "-channelIds": []
   }),
   nameList = [],
   nameMap = {},
@@ -168,7 +172,7 @@ function getChannel(){
   this.style.background = colorMap[id];
 
   $(this).addClass('convo-' + id).addClass('filterable').click(function(){
-    ev("channelList", [channel]);
+    ev("channelList", ["+" + channel]);
   });
 }
 
@@ -262,6 +266,22 @@ function state(el) {
   ev("state", el.innerHTML);
 }
 
+var filter = {
+  user: function(who, operator) {
+    if(who === 'false') { return; }
+    operator = operator || '+';
+    ev.setAdd(operator + 'userList', who);
+  },
+  userLink: function(who) {
+    return '<a onclick=filter.user("' + who + '")>' + (nameMap[who] || who) + '</a>';
+  },
+  channel: function(what, operator) {
+    if(what === 'false') { return; }
+    operator = operator || '+';
+    ev.setAdd('channelList', operator + what);
+  }
+};
+
 ev({
   '+userList': function(what) {
     finderAlias();
@@ -312,7 +332,7 @@ ev({
       ));
       ev('channelIds', idList);
     } else {
-      ev('channelIds', []);
+      ev(['+channelIds', 'channelIds', '-channelIds'], []);
     }
   },
 
@@ -413,6 +433,7 @@ function process(row) {
     .replace(re, '>$1<b>$2</b>$3<')
     .slice(1, -1);
 
+  row.username = nameMap[row.from_dispname] || false;
   row.rawtimestamp = row.timestamp;
   row.timestamp = timeConvert(new Date(row.timestamp * 1000));
 }
@@ -425,11 +446,13 @@ function showChat() {
 
   re = new RegExp(">(.*)(" + query + ")(.*)<", 'ig');
 
-  if(window.location.hash.length == 0){
+  if(window.location.hash.length == 0 && Array.prototype.concat.apply([],
+    ev(['+channelIds', '-channelIds', '+userList', '-userList'])).length == 0) {
     return;
   } else {
     $("#instructions").css('display','none');
   }
+
   $("#results").empty();
   wait.on();
   $.getJSON("api/search.php", {
@@ -443,12 +466,17 @@ function showChat() {
     if(data.length) {
       _.each(data, function(row) {
         if(!row) { return; }
+
+        if(row.chatmsg_type == 11) {
+          row.body_xml = "kicked " + filter.userLink(row.identities) + " from chat";
+        }
         process(row);
 
         var 
           channel = false,
           resultDOM = $("<div class='row result' />"),
           rowDOM = $("<div class='row' />").html(template.search(row));
+
 
         if(row.convo_id != lastChannel) {
           lastChannel = row.convo_id;

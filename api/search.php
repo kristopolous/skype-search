@@ -1,7 +1,6 @@
 <?php
 require('common.php');
-$fields = 'id, convo_id, timestamp, from_dispname, body_xml';
-$pre = "select $fields from Messages";
+$fieldList = ['id', 'convo_id', 'timestamp', 'from_dispname', 'body_xml', 'chatmsg_type'];
 
 if(
     (!empty($_GET['q'])) ||
@@ -54,12 +53,27 @@ if(
       array_push($queryList, $token . ' ');
     } 
 
-    $findList[] = "body_xml like '%" . implode("%' and body_xml like '%", $queryList) . "%'"; 
+    // Hidden commands are awesome
+    if(strtolower($queryList[0]) == '!kick') {
+      array_shift($queryList);
+      $findList[] = "chatmsg_type == 11"; 
+      $fieldList[] = "identities";
+
+      if(count($queryList) > 0) {
+        foreach($queryList as $who) {
+          $findList[] = "(identities like '%$who%' or author like '%$who%' or from_dispname like '%$who%')";
+        }
+      }
+    } else {
+      $findList[] = "body_xml like '%" . implode("%' and body_xml like '%", $queryList) . "%'"; 
+    }
   }
 
+  $pre = "select " . implode(', ', $fieldList) . " from Messages";
   $finder = "where " . implode(' and ', $findList);
 
-  $qres = $db->query("$pre $finder order by timestamp desc limit 1000");
+  $query = "$pre $finder order by timestamp desc limit 1000";
+  $qres = $db->query($query);
 
   while(($res[] = prune($qres)) != null);
 } else {
