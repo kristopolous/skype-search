@@ -1,6 +1,6 @@
 <?php
 require('common.php');
-$fieldList = ['id', 'convo_id', 'timestamp', 'from_dispname', 'body_xml', 'chatmsg_type'];
+$fieldList = ['id', 'convo_id', 'timestamp', 'from_dispname', 'body_xml', 'chatmsg_type', 'identities'];
 
 if(
     (!empty($_GET['q'])) ||
@@ -54,10 +54,15 @@ if(
     } 
 
     // Hidden commands are awesome
-    if(strtolower($queryList[0]) == '!kick') {
+    if(substr($queryList[0], 0, 1) == '!') {
+      $func = strtolower($queryList[0]);
       array_shift($queryList);
-      $findList[] = "chatmsg_type == 11"; 
-      $fieldList[] = "identities";
+
+      if($func == '!kick') {
+        $findList[] = "chatmsg_type == 11"; 
+      } elseif($func == '!join') {
+        $findList[] = "chatmsg_type == 1"; 
+      }
 
       if(count($queryList) > 0) {
         foreach($queryList as $who) {
@@ -78,6 +83,7 @@ if(
   while(($res[] = prune($qres)) != null);
 } else {
 
+  $pre = "select " . implode(', ', $fieldList) . " from Messages";
   $ts = addslashes($_GET['ts']);
   $convo = addslashes($_GET['convo']);
 

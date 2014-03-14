@@ -17,7 +17,7 @@ small {
   font-family: monospace;
 }
 
-a { cursor: pointer }
+a { cursor: pointer ; color: darkblue;}
 
 #dp3 {
   margin: 5px 5px 0 0;
@@ -69,6 +69,7 @@ a { cursor: pointer }
 .row > .row {
   margin-left: 0;
 }
+
 .off > * { display: none }
 .row.result.highlight,
 .off .highlight {
@@ -85,8 +86,21 @@ a { cursor: pointer }
   display: block;
   font-size: 0.8em
 }
+.result .text  { 
+  margin:0;
+  margin-left:10px;
+  width: 760px;
+  display:inline-block;
+}
+ 
+.expanded> div:nth-child(2n) { background: #eee }
 .result .author { 
+  width: 150px;
+  white-space: nowrap;
+  vertical-align:top;
+  display:inline-block;
   line-height: 1.15em;
+  overflow:hidden;
   font-size: 0.8em;
   padding-left: 1.25em;
 }
@@ -95,7 +109,7 @@ a { cursor: pointer }
   display: none;
 }
 .row-fluid .expanded [class*="span"] {
-  min-height: 0px;
+  min-height: 1em;
 }
 .expanded > div {
   line-height: 16px;
@@ -126,7 +140,7 @@ a { cursor: pointer }
   margin: 0.25em 0;
   border-bottom: 1px solid #434 }
 
-.highlight {
+div.expanded > div.highlight {
   cursor: pointer;
   background: rgba(250,250,160, 0.5);
   display: block !important;

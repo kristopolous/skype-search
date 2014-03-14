@@ -425,6 +425,15 @@ function Expand(ts, convo, el, button) {
 }
 
 function process(row) {
+  (row.chatmsg_type == 1) && (row.body_xml = "*** invited " + row.identities.split(' ').map(filter.userLink).join(' ') + " to join");
+  (row.chatmsg_type == 4) && (row.body_xml = "*** left the chat");
+  (row.chatmsg_type == 11) && (row.body_xml = "*** kicked " + row.identities.split(' ').map(filter.userLink).join(' ') + " from chat");
+
+  if(row.body_xml == null) { 
+    row.body_xml = "*** unsupported chatmsg_type: " + row.chatmsg_type + " (message id: " + row.id + ")";
+  }
+  (row.body_xml.length == 0) && (row.body_xml = "*** empty message");
+
   // a little trick to make sure we don't regex replace
   // inside of a tag.
   row.body_xml = ('>' + row.body_xml + '<')
@@ -467,9 +476,6 @@ function showChat() {
       _.each(data, function(row) {
         if(!row) { return; }
 
-        if(row.chatmsg_type == 11) {
-          row.body_xml = "kicked " + filter.userLink(row.identities) + " from chat";
-        }
         process(row);
 
         var 
