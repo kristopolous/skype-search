@@ -92,7 +92,9 @@ a { cursor: pointer ; color: darkblue;}
   width: 760px;
   display:inline-block;
 }
- 
+
+#from, #to { width: 8em}
+
 .expanded> div:nth-child(2n) { background: #eee }
 .result .author { 
   width: 150px;

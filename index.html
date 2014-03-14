@@ -56,12 +56,10 @@
             id="showAll" 
             onclick="filterClear()">All</button>
 
-            <form class="navbar-dates pull-right">
-              <div class="input-append date" id="dp3" data-date-format="yyyy-mm-dd">
-                <input class="span2" size="16" type="text">
-                <span class="add-on"><i class="icon-th"></i></span>
-              </div>
-            </form>
+          <form class="navbar-search pull-right">
+            <input class="search-query" placeholder="From" id="from" size="3" type="text">
+            <input class="search-query" placeholder="To" id="to" size="5" type="text">
+          </form>
 
           <div class="container" id="filterList-container">
             <span id="filterList"></span>
@@ -140,7 +138,6 @@
     <script src="js/evda.min.js"></script>
     <script src="js/db.min.js"></script>
     <script src="js/ui.js"></script>
-    <script src="js/bootstrap-datepicker.js"></script>
     <script src="js/skype-search.js"></script>
 
   </body>
