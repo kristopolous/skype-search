@@ -58,7 +58,9 @@ if(
       $func = strtolower($queryList[0]);
       array_shift($queryList);
 
-      if($func == '!kick') {
+      if($func == '!left') {
+        $findList[] = "chatmsg_type == 4"; 
+      } elseif($func == '!kick') {
         $findList[] = "chatmsg_type == 11"; 
       } elseif($func == '!join') {
         $findList[] = "chatmsg_type == 1"; 

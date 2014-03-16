@@ -20,6 +20,10 @@ var
   nameMap = {},
   colorMap = {};
 
+function searchDate(){
+  alert("HI");
+}
+
 function swap(){
   var slosh = $(this).attr('hover');
   $(this).attr({'hover': $(this).attr('class')});
