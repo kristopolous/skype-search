@@ -428,10 +428,25 @@ function Expand(ts, convo, el, button) {
   });
 }
 
+function parseCall(xml) {
+  var sub = $(xml), table = [];
+  $("part", sub).each(function(what) {
+    table.push(
+    '<tr>' +
+      '<td>' + $("name", this).html() + '</td>' +
+      '<td>' + doFractionalDuration(parseInt($("duration", this).html(),10)) + '</td>' +
+    '</tr>'
+    )
+  });
+  return '*** call<br><table>' + table.join('') + '</table>'; 
+}
+
 function process(row) {
   (row.chatmsg_type == 1) && (row.body_xml = "*** invited " + row.identities.split(' ').map(filter.userLink).join(' ') + " to join");
   (row.chatmsg_type == 4) && (row.body_xml = "*** left the chat");
+  (row.chatmsg_type == 15) && (row.body_xml = "*** changed the picture");
   (row.chatmsg_type == 11) && (row.body_xml = "*** kicked " + row.identities.split(' ').map(filter.userLink).join(' ') + " from chat");
+  (row.chatmsg_type == 18) && (row.body_xml = parseCall(row.body_xml));
 
   if(row.body_xml == null) { 
     row.body_xml = "*** unsupported chatmsg_type: " + row.chatmsg_type + " (message id: " + row.id + ")";
