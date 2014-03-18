@@ -18,10 +18,20 @@ var
   }),
   nameList = [],
   nameMap = {},
+  // The global list of search params that will get tacked on to the search query
+  searchParams = {},
   colorMap = {};
 
+function clearSearchDate(){
+  $("#from,#to").val('');
+  delete searchParams['to'];
+  delete searchParams['from'];
+  showChat();
+}
 function searchDate(){
-  alert("HI");
+  searchParams['from'] = $("#from").val();
+  searchParams['to'] = $("#to").val();
+  showChat();
 }
 
 function swap(){
@@ -190,6 +200,7 @@ function getName(){
 
   var cName = value.replace(/[^\w]/g,'');
 
+/*
   $(this).addClass('user-' + cName).hover(
     function() { 
       $(".user-" + cName).addClass('hover'); 
@@ -200,6 +211,7 @@ function getName(){
       $(".user-" + cName).parent().parent().removeClass('hover'); 
     }
  );
+  */
 }
 
 ev.setter('calls', function(done) {
@@ -483,13 +495,14 @@ function showChat() {
 
   $("#results").empty();
   wait.on();
-  $.getJSON("api/search.php", {
-    q: query,
-    rooms: ev('+channelIds'),
-    notRooms: ev('-channelIds'),
-    users: ev('+userList'),
-    notUsers: ev('-userList')
-  }, function(data) {
+  $.getJSON("api/search.php", _.extend({
+      q: query,
+      rooms: ev('+channelIds'),
+      notRooms: ev('-channelIds'),
+      users: ev('+userList'),
+      notUsers: ev('-userList')
+    }, searchParams)
+  , function(data) {
     wait.off();
     if(data.length) {
       _.each(data, function(row) {

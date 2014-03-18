@@ -13,6 +13,14 @@ if(
   // at least that's how I work... 
   $findList = Array();
 
+  if(!empty($_GET['from'])) {
+    $findList[] = "timestamp >= " . strtotime($_GET['from']);
+  } 
+
+  if(!empty($_GET['to'])) {
+    $findList[] = "timestamp <= " . strtotime($_GET['to']);
+  } 
+
   if(!empty($_GET['rooms'])) {
     $findList[] = "convo_id in (" . mysql_real_escape_string(implode(',', $_GET['rooms'])) . ")";
   } 
@@ -83,6 +91,12 @@ if(
   $qres = $db->query($query);
 
   while(($res[] = prune($qres)) != null);
+
+  // If the sql query failed, then add the query string in
+  // for debugging purposes.
+  if($res[0] == false) {
+    $res[] = $query;
+  }
 } else {
 
   $pre = "select " . implode(', ', $fieldList) . " from Messages";
