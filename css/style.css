@@ -106,6 +106,11 @@ a { cursor: pointer ; color: darkblue;}
   font-size: 0.8em;
   padding-left: 1.25em;
 }
+/* Putting a transparent colon after the name will make it so that a copy/paste of the content
+ * will reveal a colon after the name, but in the browser it will stay invisible
+ */
+.author .colon { color: transparent }
+
 .author a { color: darkblue; }
 .expanded .timestamp {
   display: none;
