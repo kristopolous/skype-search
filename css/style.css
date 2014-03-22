@@ -111,6 +111,7 @@ a { cursor: pointer ; color: darkblue;}
  */
 .author .colon { color: transparent }
 
+pre.tab{display:inline-block;background:none;width:0;border:0;margin:0;padding:0}
 .author a { color: darkblue; }
 .expanded .timestamp {
   display: none;

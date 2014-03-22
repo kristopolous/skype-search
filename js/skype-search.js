@@ -469,7 +469,7 @@ function process(row) {
   // inside of a tag.
   row.body_xml = ('>' + row.body_xml + '<')
     .replace(/\ \ /g, '&nbsp; ')
-    .replace(/\n/g, "<br>")
+    .replace(/\n/g, "<br><pre class='tab'>\t</pre>")
     .replace(re, '>$1<b>$2</b>$3<')
     .slice(1, -1);
 
