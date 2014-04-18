@@ -80,7 +80,14 @@ if(
         }
       }
     } else {
-      $findList[] = "body_xml like '%" . implode("%' and body_xml like '%", $queryList) . "%'"; 
+      foreach($queryList as $what) {
+        // Exclude this from the results
+        if(substr($what, 0, 1) == '-') {
+          $findList[] = "(body_xml not like '%" . substr($what, 1) . "%')"; 
+        } else {
+          $findList[] = "(body_xml like '%$what%')"; 
+        }
+      }
     }
   }
 

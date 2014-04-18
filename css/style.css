@@ -106,12 +106,17 @@ a { cursor: pointer ; color: darkblue;}
   font-size: 0.8em;
   padding-left: 1.25em;
 }
+
 /* Putting a transparent colon after the name will make it so that a copy/paste of the content
  * will reveal a colon after the name, but in the browser it will stay invisible
  */
 .author .colon { color: transparent }
 
+/* This is similar to the previous trick, but for multi-line chat messages.  We put in some spacing and elipses prior to
+ * each line, but then hide their display in a way that a copy/paste will still pick it up, but the human eye will not
+ */
 pre.tab{display:inline-block;background:none;width:2px;border:0;margin:0 0 0 -2px;padding:0;height:3px;font-size:0px}
+
 .author a { color: darkblue; }
 .expanded .timestamp {
   display: none;
