@@ -81,8 +81,12 @@ if(
       }
     } else {
       foreach($queryList as $what) {
+        // If we are quoting things then we really want this to be searched
+        if(substr($what, 0, 1) == '"') {
+          $what = trim($what, '"');
+          $findList[] = "(body_xml like '%$what%')"; 
         // Exclude this from the results
-        if(substr($what, 0, 1) == '-') {
+        } else if(substr($what, 0, 1) == '-') {
           $findList[] = "(body_xml not like '%" . substr($what, 1) . "%')"; 
         } else {
           $findList[] = "(body_xml like '%$what%')"; 
