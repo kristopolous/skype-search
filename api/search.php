@@ -2,6 +2,13 @@
 require('common.php');
 $fieldList = ['id', 'convo_id', 'timestamp', 'from_dispname', 'body_xml', 'chatmsg_type', 'identities'];
 
+// That which we return
+$res = Array(
+  'res' => true,
+  'data' => [],
+  'dbg' => [],
+);
+
 if(
     (!empty($_GET['q'])) ||
     (!empty($_GET['rooms'])) ||
@@ -99,14 +106,16 @@ if(
   $finder = "where " . implode(' and ', $findList);
 
   $query = "$pre $finder order by timestamp desc limit 1000";
+
+  // Add the query to the debug list
+  $res['dbg'][] = $query;
   $qres = $db->query($query);
 
-  while(($res[] = prune($qres)) != null);
+  while(($res['data'] = prune($qres)) != null);
 
-  // If the sql query failed, then add the query string in
-  // for debugging purposes.
-  if($res[0] == false) {
-    $res[] = $query;
+  // If the sql query failed, then swap the return code to false
+  if($res['data'][0] == false) {
+    $res['res'] = false;
   }
 } else {
 
@@ -125,11 +134,13 @@ if(
   ) as $tuple) {
     list($oper, $order) = $tuple;
 
-    $qres = $db->query("$pre where timestamp $oper $ts and convo_id = $convo order by timestamp $order limit " . (13 * $_GET['level']));
-    while(($res[] = prune($qres)) != null);
+    $query = "$pre where timestamp $oper $ts and convo_id = $convo order by timestamp $order limit " . (13 * $_GET['level']);
+    $res['dbg'][] = $query;
+    $qres = $db->query($query);
+    while(($res['data'] = prune($qres)) != null);
 
     if($oper == '<') {
-      $res = array_reverse($res);
+      $res['data'] = array_reverse($res['data']);
     }
   }
 }
