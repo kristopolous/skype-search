@@ -412,10 +412,13 @@ function Expand(ts, convo, el, button) {
     ts: ts,
     convo: convo,
     level: button.level
-  }, function(data) {
+  }, function(res) {
     var 
+      data = res.data,
       rowDOM,
       lastAuthor;
+
+    console.log(res.dbg);
 
     $(el)
       .empty()
@@ -502,7 +505,9 @@ function showChat() {
       users: ev('+userList'),
       notUsers: ev('-userList')
     }, searchParams)
-  , function(data) {
+  , function(res) {
+    var data = res.data;
+    console.log(res.dbg.join("\n"));
     wait.off();
     if(data.length) {
       _.each(data, function(row) {

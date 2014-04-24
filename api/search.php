@@ -89,8 +89,8 @@ if(
     } else {
       foreach($queryList as $what) {
         // If we are quoting things then we really want this to be searched
-        if(substr($what, 0, 1) == '"') {
-          $what = trim($what, '"');
+        if(strpos($what, '"') !== false) {
+          $what = trim(stripslashes($what), '"');
           $findList[] = "(body_xml like '%$what%')"; 
         // Exclude this from the results
         } else if(substr($what, 0, 1) == '-') {
@@ -102,6 +102,7 @@ if(
     }
   }
 
+  $res['dbg'][] =  $queryList;
   $pre = "select " . implode(', ', $fieldList) . " from Messages";
   $finder = "where " . implode(' and ', $findList);
 
