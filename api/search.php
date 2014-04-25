@@ -112,7 +112,7 @@ if(
   $res['dbg'][] = $query;
   $qres = $db->query($query);
 
-  while(($res['data'] = prune($qres)) != null);
+  while(($res['data'][] = prune($qres)) != null);
 
   // If the sql query failed, then swap the return code to false
   if($res['data'][0] == false) {
