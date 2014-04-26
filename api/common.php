@@ -20,4 +20,38 @@ function prune($obj) {
   } 
   return $ret;
 }
+
+// There's probably a regex way of doing this
+function parser($t) {
+  $strList = [];
+  $quoteList = [];
+  $entry = '';
+  $qbool = false;
+
+  for($x = 0; $x < strlen($t); $x++) {
+    $chr = $t[$x];
+    if($chr == '"') {
+      $qbool = !$qbool;
+      // This would mean we've ended
+      if($qbool == false) {
+        $quoteList[] = addslashes($entry);
+        $entry = '';
+      }
+    } 
+    else if($chr == ' ' && !$qbool){
+      if( strlen($entry) > 0) {
+        $strList[] = addslashes($entry);
+        $entry = '';
+      }
+    } else {
+      $entry .= $chr;
+    }
+  }
+  if(!$qbool && strlen($entry) > 0) {
+    $strList[] = $entry;
+  }
+
+  return Array($strList, $quoteList);
+}
+
 $res = Array();

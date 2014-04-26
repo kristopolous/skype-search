@@ -5,8 +5,8 @@ $fieldList = ['id', 'convo_id', 'timestamp', 'from_dispname', 'body_xml', 'chatm
 // That which we return
 $res = Array(
   'res' => true,
-  'data' => [],
-  'dbg' => [],
+  'data' => Array(),
+  'dbg' => Array(),
 );
 
 if(
@@ -45,7 +45,7 @@ if(
   } 
 
   if(!empty($_GET['q'])) {
-    $queryList = explode(' ', addslashes($_GET['q']));
+    list($queryList, $quoteList) = parser($_GET['q']);
 
     // Sometimes you want to search a complete word, like "inc" and not "include"
     // You'd like a trailing space on it to make this possible.
@@ -87,13 +87,12 @@ if(
         }
       }
     } else {
+      // Do the quoted strings first
+      foreach($quoteList as $what) {
+        $findList[] = "(body_xml like '%$what%')"; 
+      }
       foreach($queryList as $what) {
-        // If we are quoting things then we really want this to be searched
-        if(strpos($what, '"') !== false) {
-          $what = trim(stripslashes($what), '"');
-          $findList[] = "(body_xml like '%$what%')"; 
-        // Exclude this from the results
-        } else if(substr($what, 0, 1) == '-') {
+        if(substr($what, 0, 1) == '-') {
           $findList[] = "(body_xml not like '%" . substr($what, 1) . "%')"; 
         } else {
           $findList[] = "(body_xml like '%$what%')"; 
