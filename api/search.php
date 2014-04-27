@@ -50,26 +50,28 @@ if(
     // Sometimes you want to search a complete word, like "inc" and not "include"
     // You'd like a trailing space on it to make this possible.
     // If the first token is empty
-    if(strlen($queryList[0]) == 0) {
-      // we shift it off
-      array_shift($queryList);
+    if(count($queryList) > 0) {
+      if(strlen($queryList[0]) == 0) {
+        // we shift it off
+        array_shift($queryList);
 
-      // and prepend a space.
-      $queryList[0] = ' ' . $queryList[0];
+        // and prepend a space.
+        $queryList[0] = ' ' . $queryList[0];
+      }
+
+      if(strlen(end($queryList)) == 0) {
+
+        // Do the same thing in the other direction
+        $space = array_pop($queryList);
+
+        $token = array_pop($queryList);
+        
+        array_push($queryList, $token . ' ');
+      } 
     }
 
-    if(strlen(end($queryList)) == 0) {
-
-      // Do the same thing in the other direction
-      $space = array_pop($queryList);
-
-      $token = array_pop($queryList);
-      
-      array_push($queryList, $token . ' ');
-    } 
-
     // Hidden commands are awesome
-    if(substr($queryList[0], 0, 1) == '!') {
+    if(count($queryList) > 0 && substr($queryList[0], 0, 1) == '!') {
       $func = strtolower($queryList[0]);
       array_shift($queryList);
 
