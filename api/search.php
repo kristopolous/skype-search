@@ -44,6 +44,9 @@ if(
     $findList[] = "author not in (\"" . implode('","', $_GET['notUsers']) . "\")";
   } 
 
+  $queryList = Array();
+  $quoteList = Array();
+
   if(!empty($_GET['q'])) {
     list($queryList, $quoteList) = parser($_GET['q']);
 
