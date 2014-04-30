@@ -109,6 +109,7 @@
     <script type="text/template" id="Channel-Item">
       <li><a><%= content %></a></li>
     </script>
+
     <script type="text/template" id="Call-Result">
       <div class="span1 timestamp"><span><%= begin_timestamp %></span></div>
       <div class="span1 duration"><span><%=duration %><small><%= fractional_duration %> hr</small></span></div>
@@ -135,6 +136,7 @@
       <div title="<%= timestamp %>" class="author"><a onclick='filter.user("<%= username %>")'><%= $.trim(from_dispname) %></a><span class='timestamp'><%= timestamp %></span><span class='colon'>:</span></div>
       <div class="text"><%= body_xml %></div>
     </script>
+
     <!-- Le javascript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->

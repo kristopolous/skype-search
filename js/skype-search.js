@@ -28,6 +28,7 @@ function clearSearchDate(){
   delete searchParams['from'];
   showChat();
 }
+
 function searchDate(){
   searchParams['from'] = $("#from").val();
   searchParams['to'] = $("#to").val();
@@ -472,7 +473,7 @@ function process(row) {
   // inside of a tag.
   row.body_xml = ('>' + row.body_xml + '<')
     .replace(/\ \ /g, '&nbsp; ')
-    .replace(/\n/g, "<br><pre class='tab'>&nbsp; ... &nbsp;</pre>")
+    .replace(/\n/g, process.newline_replacer)
     .replace(re, '>$1<b>$2</b>$3<')
     .slice(1, -1);
 
@@ -480,6 +481,13 @@ function process(row) {
   row.rawtimestamp = row.timestamp;
   row.timestamp = timeConvert(new Date(row.timestamp * 1000));
 }
+// chrome inline-blocks will prepend the elipses on the same line,
+// firefox will place them on separate.
+process.newline_replacer = navigator.userAgent.search(/WebKit/) > -1 ?
+  // chrome
+  "<br><pre class='tab'>&nbsp; ... &nbsp;</pre>" :
+  // not chrome
+  "<br><i class='tab'>&nbsp; ... &nbsp;</i>";
 
 function showChat() {
   var lastChannel;
