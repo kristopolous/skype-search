@@ -27,7 +27,8 @@ Features above:
  * You can search multiple rooms at once
  * If you click on the "Skype-Search" brand on the left, the search query will go away and then you can see just the logs of the rooms that you have selected.
  * The search terms are a boolean OR
- * To *exclude* a search term, prefix it with a "-".  To search for a "-" um ... well, you can't.
+ * A double quoted string, such as "hello world" will search for all things within the double quotes.
+ * To *exclude* a search term, prefix it with a "-".  To search for a "-" put it in double quotes
 
 <blockquote>
 Note: Only the first 1,000 results are shown to try to save your browser from locking up due to some bad query.

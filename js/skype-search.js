@@ -517,7 +517,8 @@ function showChat() {
     var data = res.data;
     console.log(res.dbg.join("\n"));
     wait.off();
-    if(data.length) {
+
+    if(data.length && data[0] !== false) {
       _.each(data, function(row) {
         if(!row) { return; }
 
@@ -543,7 +544,11 @@ function showChat() {
         })
       });
     } else {
-      $("#results").html("<h2>Woops, nothing found for '" + query + "'. Check the spelling?</h2>");
+      var append = '';
+      if(searchParams.from) {
+        append = " between " + searchParams.from + " and " + searchParams.to;
+      }
+      $("#results").html("<h2>Woops, nothing found for '" + query + "'" + append +". Check the spelling?</h2>");
     }
   });
   window.scrollTo(0,0);
