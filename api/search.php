@@ -142,7 +142,7 @@ if(
     $query = "$pre where timestamp $oper $ts and convo_id = $convo order by timestamp $order limit " . (13 * $_GET['level']);
     $res['dbg'][] = $query;
     $qres = $db->query($query);
-    while(($res['data'] = prune($qres)) != null);
+    while(($res['data'][] = prune($qres)) != null);
 
     if($oper == '<') {
       $res['data'] = array_reverse($res['data']);
