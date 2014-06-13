@@ -59,6 +59,11 @@ You can see when people joined or left by searching for
 Here's an example:
 <img src=http://i.imgur.com/mVPUhxr.png>
 
+Other commands:
+
+    !file (show all the files that were sent)
+    !left (show when a user left on their own accord)
+
 ## Miscellaneous Information
 
 * Edited messages are edited in the database. There is no record of its previous state (although there may be in the journal or other parts of what Skype stores ...)

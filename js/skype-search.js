@@ -460,6 +460,7 @@ function parseCall(xml) {
 function process(row) {
   (row.chatmsg_type == 1) && (row.body_xml = "*** invited " + row.identities.split(' ').map(filter.userLink).join(' ') + " to join");
   (row.chatmsg_type == 4) && (row.body_xml = "*** left the chat");
+  (row.chatmsg_type == 7) && (row.body_xml = "*** sent file " + row.body_xml);
   (row.chatmsg_type == 15) && (row.body_xml = "*** changed the picture");
   (row.chatmsg_type == 11) && (row.body_xml = "*** kicked " + row.identities.split(' ').map(filter.userLink).join(' ') + " from chat");
   (row.chatmsg_type == 18) && (row.body_xml = parseCall(row.body_xml));

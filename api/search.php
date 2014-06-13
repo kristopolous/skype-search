@@ -82,6 +82,9 @@ if(
         $findList[] = "chatmsg_type == 4"; 
       } elseif($func == '!kick') {
         $findList[] = "chatmsg_type == 11"; 
+      } elseif($func == '!file') {
+        $findList[] = "chatmsg_type == 7"; 
+        $findList[] = "(body_xml like '%Posted files%')";
       } elseif($func == '!join') {
         $findList[] = "chatmsg_type == 1"; 
       }
