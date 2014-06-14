@@ -73,8 +73,11 @@ if(
       } 
     }
 
+    $searchType = 'text';
+
     // Hidden commands are awesome
     if(count($queryList) > 0 && substr($queryList[0], 0, 1) == '!') {
+      $searchType = 'person';
       $func = strtolower($queryList[0]);
       array_shift($queryList);
 
@@ -83,12 +86,15 @@ if(
       } elseif($func == '!kick') {
         $findList[] = "chatmsg_type == 11"; 
       } elseif($func == '!file') {
+        $searchType = 'text';
         $findList[] = "chatmsg_type == 7"; 
         $findList[] = "(body_xml like '%Posted files%')";
       } elseif($func == '!join') {
         $findList[] = "chatmsg_type == 1"; 
       }
+    }
 
+    if($searchType == 'person') {
       if(count($queryList) > 0) {
         foreach($queryList as $who) {
           $findList[] = "(identities like '%$who%' or author like '%$who%' or from_dispname like '%$who%')";
