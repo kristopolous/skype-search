@@ -2,6 +2,8 @@
 require('common.php');
 $fieldList = ['id', 'convo_id', 'timestamp', 'from_dispname', 'body_xml', 'chatmsg_type', 'identities'];
 
+$limit = (empty($_GET['limit'])) ? 1000 : mysql_real_escape_string($_GET['limit']);
+
 // That which we return
 $res = Array(
   'res' => true,
@@ -85,6 +87,8 @@ if(
         $findList[] = "chatmsg_type == 4"; 
       } elseif($func == '!kick') {
         $findList[] = "chatmsg_type == 11"; 
+      } elseif($func == '!call') {
+        $findList[] = "chatmsg_type == 18"; 
       } elseif($func == '!file') {
         $searchType = 'text';
         $findList[] = "chatmsg_type == 7"; 
@@ -119,7 +123,7 @@ if(
   $pre = "select " . implode(', ', $fieldList) . " from Messages";
   $finder = "where " . implode(' and ', $findList);
 
-  $query = "$pre $finder order by timestamp desc limit 1000";
+  $query = "$pre $finder order by timestamp desc limit $limit";
 
   // Add the query to the debug list
   $res['dbg'][] = $query;

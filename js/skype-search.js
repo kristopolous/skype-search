@@ -16,11 +16,21 @@ var
     "+channelIds": [],
     "-channelIds": []
   }),
+  Group = {},
   nameList = [],
   nameMap = {},
   // The global list of search params that will get tacked on to the search query
   searchParams = {},
   colorMap = {};
+
+_.each(['add','rm','get'], function(what) {
+  Group[what] = function(group, who, cb) {
+    $.getJSON("api/group.php", {
+      action: what,
+      params: Array.prototype.slice.call(arguments, 0, 2)
+    }, cb || function(){});
+  }
+});
 
 function clearSearchDate(){
   $("#from,#to").val('');
