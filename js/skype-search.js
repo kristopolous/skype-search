@@ -112,7 +112,29 @@ $(function(){
     // of web application runtime.
     var channels = ev('convodb').select('displayname');
 
-    $("#room").typeahead({
+    $("#room").keydown(function(e) {
+      console.log(e);
+      if(e.which == 13) {
+        var parts = this.value.split(' '),
+          action = parts.shift(),
+          query = parts.join(' '),
+          regex = new RegExp(query, 'i'), list;
+
+        if(query.search(/\*/) > -1) {
+          list = ev('convodb').find({
+            displayname: function(m) {
+              return m.search(regex) >  -1
+            }
+          }).select('displayname');
+
+          ev.setadd("channelList", 
+            _.map(list, function(thing) {
+              return action.substr(0, 1) + thing;
+            })
+          );
+        }
+      }
+    }).typeahead({
       source: function(){ 
         var set;
 

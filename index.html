@@ -30,11 +30,7 @@
 
     <div class="navbar navbar-inverse navbar-fixed-top">
       <div class="navbar-inner">
-          <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button>
+        <div class="container">
          
           <form class="navbar-search pull-left" action=javascript:finderAlias()>
             <input type="text" id="search" class="search-query" placeholder="Search">
@@ -49,9 +45,11 @@
             <input data-provide="typeahead" type="text" id="room" class="search-query" placeholder="Room Filter">
           </form>
 
+
           <button 
             disabled
             class="btn" 
+            style="display:none"
             type="button" 
             id="showAll" 
             onclick="filterClear()">All</button>
@@ -61,15 +59,16 @@
             <input class="search-query" placeholder="To" id="to" size="5" type="text">
             <input type=submit style=display:none>
           </form>
+
           <button
             style='float:right'
             class="btn" 
             type="button" 
             id="noSearch" onclick="clearSearchDate()">Clear</button>
-
-          <div class="container" id="filterList-container">
-            <span id="filterList"></span>
-          </div>
+        </div>
+        <div class="container" id="filterList-container">
+          <span id="filterList"></span>
+        </div>
       </div>
     </div>
 
