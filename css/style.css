@@ -63,8 +63,7 @@ a { cursor: pointer ; color: darkblue;}
     inset 0px 0px 1px 2px #aac;
 }
 .result {
-  border-top: 1px solid #a9a;
-  margin: 0.5em 0;
+  margin: 0.25em 0;
 }
 .row > .row {
   margin-left: 0;

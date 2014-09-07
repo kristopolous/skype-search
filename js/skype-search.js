@@ -493,6 +493,7 @@ function Expand(ts, convo, el, button) {
 
 function parseCall(xml) {
   var sub = $(xml), table = [];
+  
   $("part", sub).each(function(what) {
     table.push(
     '<tr>' +
@@ -522,6 +523,7 @@ function process(row) {
   row.body_xml = ('>' + row.body_xml + '<')
     .replace(/\ \ /g, '&nbsp; ')
     .replace(/\n/g, process.newline_replacer)
+    .replace(/<a /g, '<a target=_blank ')
     .replace(re, '>$1<b>$2</b>$3<')
     .slice(1, -1);
 
