@@ -4,6 +4,9 @@ body {
  display: none;
 }
 
+:visited {
+  color: purple;
+}
 form {
   margin: 0
 }
