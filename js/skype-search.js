@@ -19,9 +19,14 @@ var
   Group = {},
   nameList = [],
   nameMap = {},
+  Chats = DB(),
   // The global list of search params that will get tacked on to the search query
   searchParams = {},
   colorMap = {};
+
+Chats.beforeAdd(function(row) {
+  row.participants = row.participants.split(' ');
+})
 
 _.each(['add','rm','get'], function(what) {
   Group[what] = function(group, who, cb) {
@@ -491,6 +496,41 @@ function Expand(ts, convo, el, button) {
   });
 }
 
+var authorCheck = (function() {
+  var lastAuthor = 0, lastConvo = 0;
+
+  return function(row) {
+    var 
+      what = row.from_dispname,
+      convo = row.convo_id;
+
+    what = $.trim(what);
+
+    var ret = ((convo === lastConvo) && (what === lastAuthor)) ? '&hellip;' : what;
+
+    lastAuthor = what;
+    lastConvo = convo;
+
+    return ret;
+  }
+})(); 
+
+var timestampCheck = (function(){
+  var lastTimestamp = 0, lastConvo = 0;
+
+  return function(what, row) {
+    var delta = (Math.abs(what - lastTimestamp)), ret;
+
+    ret = ((lastConvo !== row.convo_id) || (delta > 60 * 5)) ? '' : 'hide';
+
+    console.log(lastConvo, row.convo_id);
+    lastConvo = row.convo_id;
+    lastTimestamp = what;
+
+    return ret;
+  }
+})(); 
+
 function parseCall(xml) {
   var sub = $(xml), table = [];
   
@@ -530,6 +570,7 @@ function process(row) {
   row.username = nameMap[row.from_dispname] || false;
   row.rawtimestamp = row.timestamp;
   row.timestamp = timeConvert(new Date(row.timestamp * 1000));
+  row.row = row;
 }
 // chrome inline-blocks will prepend the elipses on the same line,
 // firefox will place them on separate.
@@ -615,6 +656,10 @@ $(function(){
   $('body').css('display','block');
   $("#search").val(window.location.hash.slice(1));
   ev('state', 'Chat');
+
+  $.getJSON("api/chats.php", function(data) {
+    Chats.insert(data);
+  });
 
   setInterval(function(){
     if(window.location.hash.slice(1) != query) {

@@ -127,12 +127,12 @@
     </script>
 
     <script type="text/template" id="Search-Container">
-      <a class="btn expand"><i class="icon-chevron-down"></i></a>
+      <a class="btn expand btn-link"><i class="icon-chevron-down"></i></a>
       <div><%= row %></div>
     </script>
 
     <script type="text/template" id="Search-Result">
-      <div title="<%= timestamp %>" class="author"><a onclick='filter.user("<%= username %>")'><%= $.trim(from_dispname) %></a><span class='timestamp'><%= timestamp %></span><span class='colon'>:</span></div>
+      <div title="<%= timestamp %>" class="author"><a onclick='filter.user("<%= username %>")'><%= authorCheck(row.row) %></a><span class='timestamp <%=timestampCheck(rawtimestamp,row.row) %>'><%= timestamp %></span><span class='colon'>:</span></div>
       <div class="text"><%= body_xml %></div>
     </script>
 

@@ -11,6 +11,7 @@ form {
   margin: 0
 }
 
+.hide { display: none !important}
 small { 
   display: block;
   font-weight:normal;
