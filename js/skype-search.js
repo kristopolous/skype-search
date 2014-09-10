@@ -236,11 +236,18 @@ function getChannel(){
       .select('displayname')[0];
 
   this.innerHTML = channel;
-  this.style.background = colorMap[id];
+  this.parentNode.style.background = colorMap[id];
 
+/*
   $(this).addClass('convo-' + id).addClass('filterable').click(function(){
     ev("channelList", ["+" + channel]);
   });
+  */
+}
+
+function doFilter(verb, what) {
+  var channel = $(what.parentNode.parentNode).find('.channel-name').html();
+  ev.push("channelList", verb + channel);
 }
 
 function getName(){

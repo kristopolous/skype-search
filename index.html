@@ -122,7 +122,14 @@
 
     <script type="text/template" id="Channel-Header">
       <div class="row channel">
-      <div class="channel-name span12"><%= channel %></div>
+        <div class="span12">
+          <span class='button-group'>
+            <button onclick=doFilter('-',this) class="btn btn-mini btn-link" type="button"><i class="icon-minus"></i></button>
+            <button onclick=doFilter('+',this) class="btn btn-mini btn-link" type="button"><i class="icon-plus"></i></button>
+          </span>
+          <span class="channel-name"><%= channel %></span>
+      </div>
+
       </div>
     </script>
 

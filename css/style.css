@@ -46,14 +46,25 @@ a { cursor: pointer ; color: darkblue;}
   color: #fff;
   text-indent: 1em;
 }
-.channel span {
+.channel .button-group {
+  margin: 0 0.5em;
+}
+.channel button {
+  background: rgba(16,16,16,0.15);
+  color: rgba(216,216,216,0.5);
+  padding: 0.15em 0.2em;
+  line-height: 10px;
+}
+.channel button:hover {
+  background: rgba(216,216,216,0.45);
+}
+.channel .span12 {
   box-shadow: 
     2px 2px 4px rgba(250,250,250,0.5) inset,
     -2px -2px 4px rgba(0,0,0,0.5) inset;
   color:#ede;  
-  padding:1em;
+  padding:0.25em;
   cursor: pointer;
-  width:9em;
 }
 
 .hover {
