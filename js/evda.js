@@ -2,7 +2,7 @@
 // EvDa Events and Data v1.0
 // https://github.com/kristopolous/EvDa
 //
-// Copyright 2011, Chris McKenzie
+// Copyright 2011 - 2014 Chris McKenzie
 // Dual licensed under the MIT or GPL Version 2 licenses.
 //
 function EvDa (imported) {
@@ -136,11 +136,12 @@ function EvDa (imported) {
           if (source[prop] !== void 0) {
 
             // This recursively assigns
+            /*
             if ( isObject(source[prop]) && isObject(obj[prop]) ) {
               extend(obj[prop], source[prop]);
             } else {
-              obj[prop] = source[prop];
-            }
+             */ obj[prop] = source[prop];
+            //}
           }
         }
       });
@@ -158,6 +159,8 @@ function EvDa (imported) {
     // the end of the object to notify our future-selfs
     // that we ought to remove the function.
     ONCE = {once: 1},
+
+    lockMap = {},
 
     // Internals
     data = imported || {},
@@ -206,7 +209,7 @@ function EvDa (imported) {
 
     // If there are no arguments, and this is useful in the browser
     // debug console, return all the internal data structures.
-    if (! scope) {
+    if ( arguments.length === 0 ) {
       return {
         data: data, 
         setters: setterMap, 
@@ -251,6 +254,9 @@ function EvDa (imported) {
             scope[_key] = ret[_key]();
           }
         });
+
+        // TODO: fix this
+        bubble( keys(ret)[0] );
 
         return scope;
       }
@@ -395,6 +401,26 @@ function EvDa (imported) {
     }
   }
 
+  function bubble(key) {
+    var
+      parts = key.split('.'),
+      parts_key = parts.pop();
+      parts_obj = [];
+
+    parts_obj[parts_key] = data[key];
+
+    // we then extend the value into the group.
+    pub.extend.apply(
+      pub.context,
+      [
+        parts.join('.'),
+        parts_obj
+      ].concat(
+        slice.call(arguments, 1)
+      )
+    );
+  }
+
   extend(pub, {
     // Exposing the internal variables so that
     // extensions can be made.
@@ -492,6 +518,13 @@ function EvDa (imported) {
       });
     },
 
+    empty: function() {
+      // we want to maintain references to the object itself
+      for (var key in data) {
+        delete data[key];
+      }
+    },
+
     incr: function ( key, amount ) {
       amount = amount || 1;
       // we can't use the same trick here because if we
@@ -552,7 +585,7 @@ function EvDa (imported) {
       return pub.set.apply(
         pub.context, [
           key, 
-          extend({}, data[key], value)
+          extend({}, (data[key] || {}), value)
         ].concat(
           slice.call(arguments, 2)
         )
@@ -560,8 +593,12 @@ function EvDa (imported) {
     },
 
     set: function (key, value, _meta, bypass, _noexecute) {
+      if(lockMap[key] > 1) { return data[key]; }
+      lockMap[key] = (lockMap[key] || 0) + 1;
+
       var 
         testKey = 'test' + key,
+        result,
         args = slice.call(arguments),
         times = size(eventMap[ testKey ]),
         doTest = (times && !bypass),
@@ -583,6 +620,7 @@ function EvDa (imported) {
                 pub.set ( key, value, _meta, 1 );
               }
             }
+            return ok;
           }
         ) : {};
 
@@ -600,6 +638,11 @@ function EvDa (imported) {
         each ( eventMap[ testKey ], function ( callback ) {
           callback.call ( pub.context, value, meta );
         });
+        // Don't return the value...
+        // return the current value of that key.
+        // 
+        // This is because keys can be denied
+        result = data[key];
       } else {
 
         each ( pub.traceList, function ( callback ) {
@@ -624,17 +667,23 @@ function EvDa (imported) {
         }
 
         if(!_noexecute) {
-          return cback.call(pub.context);
+          result = cback.call(pub.context);
         } else {
-          return cback;
+          // if we are not executing this, then
+          // we return a set of functions that we
+          // would be executing.
+          result = cback;
         }
+      } 
+
+      // After this, we bubble up if relevant.
+      if(key.length > 0) {
+        bubble.apply(pub.context, [key].concat(slice.call(arguments, 2)));
       }
 
-      // Don't return the value...
-      // return the current value of that key.
-      // 
-      // This is because keys can be denied
-      return data[key];
+      lockMap[key] = 0;
+
+      return result;
     },
 
     fire: function ( key ) {
@@ -672,11 +721,29 @@ function EvDa (imported) {
 
     setadd: function ( key, value ) {
       value = isArray(value) ? value : [value];
-      return pub ( key, uniq(( data[key] || [] ).concat(value)) );
+
+      var 
+        before = data[key] || [],
+        after = uniq( before.concat(value) );
+
+      if ( before.length != after.length) {
+        return pub ( key, after );
+      }
+
+      return after;
     },
 
     setdel: function ( key, value ) {
-      return pub ( key, without(( data[key] || [] ), value) );
+
+      var
+        before = data[key] || [],
+        after = without( before, value);
+
+      if ( before.length != after.length) {
+        return pub ( key, after );
+      }
+
+      return after;
     },
 
     disable: function ( listName ) {
