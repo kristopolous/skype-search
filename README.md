@@ -64,6 +64,10 @@ Other commands:
     !file (show all the files that were sent)
     !left (show when a user left on their own accord)
 
+### Regex search
+
+You can also search for PCRE regex in a query if you start it with a '/'.  For instance if you want to see if people ever gave you their phone number, a query like `/\d{3}.{,2}\d{3}.?\d{4}/` may suit you well. It's worth noting that this is done in PHP and not through the SQLite3 pcre regex module - so it's a bit slow and doesn't go over everything - but it does the job.
+
 ## Miscellaneous Information
 
 * Edited messages are edited in the database. There is no record of its previous state (although there may be in the journal or other parts of what Skype stores ...)
