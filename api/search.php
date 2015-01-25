@@ -50,7 +50,7 @@ if(
   $quoteList = Array();
 
   if(!empty($_GET['q'])) {
-    list($queryList, $quoteList) = parser($_GET['q']);
+    list($queryList, $quoteList, $regex) = parser($_GET['q']);
 
     // Sometimes you want to search a complete word, like "inc" and not "include"
     // You'd like a trailing space on it to make this possible.
@@ -121,7 +121,11 @@ if(
 
   $res['dbg'][] =  $queryList;
   $pre = "select " . implode(', ', $fieldList) . " from Messages";
-  $finder = "where " . implode(' and ', $findList);
+  if(count($findList) > 0) {
+    $finder = "where " . implode(' and ', $findList);
+  } else {
+    $finder = '';
+  }
 
   $query = "$pre $finder order by timestamp desc limit $limit";
 
@@ -130,6 +134,19 @@ if(
   $qres = $db->query($query);
 
   while(($res['data'][] = prune($qres)) != null);
+
+  // regex matching
+  if($regex) {
+    $matchList = [];
+    foreach($res['data'] as $row) {
+      $match = false;
+      preg_match($regex, $row['body_xml'], $match);
+      if(count($match) > 0) {
+        $matchList[] = $row;
+      }
+    }
+    $res['data'] = $matchList;
+  }
 
   // If the sql query failed, then swap the return code to false
   if($res['data'][0] == false) {
