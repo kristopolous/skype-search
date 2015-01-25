@@ -121,13 +121,20 @@ if(
 
   $res['dbg'][] =  $queryList;
   $pre = "select " . implode(', ', $fieldList) . " from Messages";
+
+  if($regex) {
+    $findList[] = "chatmsg_type == 3"; 
+    $limit *= 80;
+  } 
+
   if(count($findList) > 0) {
     $finder = "where " . implode(' and ', $findList);
   } else {
     $finder = '';
   }
+  $limitPart = "limit $limit";
 
-  $query = "$pre $finder order by timestamp desc limit $limit";
+  $query = "$pre $finder order by timestamp desc $limitPart";
 
   // Add the query to the debug list
   $res['dbg'][] = $query;
@@ -138,18 +145,29 @@ if(
   // regex matching
   if($regex) {
     $matchList = [];
+    $matchIx = 0;
+    $limit /= 20;
     foreach($res['data'] as $row) {
       $match = false;
       preg_match($regex, $row['body_xml'], $match);
       if(count($match) > 0) {
         $matchList[] = $row;
+        $matchIx ++;
+
+        if($matchIx > $limit) {
+          break;
+        }
       }
     }
     $res['data'] = $matchList;
   }
 
   // If the sql query failed, then swap the return code to false
-  if($res['data'][0] == false) {
+  if(count($res['data'] > 0)) {
+    if($res['data'][0] == false) {
+      $res['res'] = false;
+    }
+  } else {
     $res['res'] = false;
   }
 } else {
