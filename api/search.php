@@ -122,7 +122,7 @@ if(
   $res['dbg'][] =  $queryList;
   $pre = "select " . implode(', ', $fieldList) . " from Messages";
 
-  if($regex) {
+  if(isset($regex) && $regex) {
     $findList[] = "chatmsg_type == 3"; 
     $limit *= 80;
   } 
@@ -143,7 +143,7 @@ if(
   while(($res['data'][] = prune($qres)) != null);
 
   // regex matching
-  if($regex) {
+  if(isset($regex) && $regex) {
     $matchList = [];
     $matchIx = 0;
     $limit /= 20;
