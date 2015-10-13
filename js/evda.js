@@ -2,12 +2,11 @@
 // EvDa Events and Data v1.0
 // https://github.com/kristopolous/EvDa
 //
-// Copyright 2011 - 2014 Chris McKenzie
+// Copyright 2009 - 2015 Chris McKenzie
 // Dual licensed under the MIT or GPL Version 2 licenses.
 //
 function EvDa (imported) {
   var 
-    BASE = '__base',
     slice = Array.prototype.slice,  
 
     // This is mostly underscore functions here. But they are included to make sure that
@@ -19,6 +18,7 @@ function EvDa (imported) {
     isFunction = function(obj) { return !!(obj && obj.constructor && obj.call && obj.apply) },
     isString = function(obj) { return !!(obj === '' || (obj && obj.charCodeAt && obj.substr)) },
     isNumber = function(obj) { return toString.call(obj) === '[object Number]' },
+    isScalar = function(obj) { return isString(obj) || isNumber(obj) },
     isObject = function(obj) {
       if(isFunction(obj) || isString(obj) || isNumber(obj) || isArray(obj)) {
         return false;
@@ -35,7 +35,9 @@ function EvDa (imported) {
 
     each = [].forEach ?
       function (obj, cb) {
-        if (isArray(obj) || obj.length) { 
+        if (isScalar(obj)) {
+          return each([obj], cb);
+        } else if (isArray(obj) || obj.length) { 
           toArray(obj).forEach(cb);
         } else {
           for( var key in obj ) {
@@ -45,7 +47,9 @@ function EvDa (imported) {
       } :
 
       function (obj, cb) {
-        if (isArray(obj)) {
+        if (isScalar(obj)) {
+          return each([obj], cb);
+        } else if (isArray(obj)) {
           for ( var i = 0, len = obj.length; i < len; i++ ) { 
             cb(obj[i], i);
           }
@@ -58,6 +62,16 @@ function EvDa (imported) {
 
     last = function(obj) {
       return obj.length ? obj[obj.length - 1] : undefined;
+    },
+
+    values = function (obj) {
+      var ret = [];
+
+      for(var key in obj) {
+        ret.push(obj[key]);
+      }
+
+      return ret;
     },
 
     keys = ({}).keys || function (obj) {
@@ -154,6 +168,8 @@ function EvDa (imported) {
     FIRST = 'first',
     ON = 'on',
     AFTER = 'after',
+    OR = 'or',
+    typeList = [FIRST, ON, AFTER, 'test', OR],
 
     // The one time callback gets a property to
     // the end of the object to notify our future-selfs
@@ -161,13 +177,16 @@ function EvDa (imported) {
     ONCE = {once: 1},
 
     lockMap = {},
+    testLockMap = {},
 
     // Internals
-    data = imported || {},
+    data = {},
+    data_ix = {},
+
+    insideTest = false,
 
     // the backlog to execute if something is paused.
     backlog = [],
-    setterMap = {},
     globberMap = {},
     eventMap = {};
 
@@ -193,7 +212,7 @@ function EvDa (imported) {
     var ret = {};
     if(isArray(what)) {
       each(what, function(field) {
-        ret[what] = cback(what);
+        ret[field] = cback(field);
       });
       return ret;
 
@@ -201,18 +220,47 @@ function EvDa (imported) {
       return cback(what);
     }
   }
+
+  // this will try to resolve what the user
+  // is asking for.
+  function resolve ( what ) {
+    if ( what in data ) {
+      return data[ what ];
+    }
+
+    // If the key isn't set then we try to resolve it
+    // through dot notation.
+    // ex: a.b.c
+    var 
+      // [a,b,c]
+      parts = what.split('.'),
+
+      // c
+      tail = parts.pop(),
+      
+      // a.b
+      head = parts.join('.');
+
+    if (head) {
+      // we try to resolve the head
+      var res = resolve( head );
+
+      if ( isObject(res) && tail in res ) {
+        return res[tail];
+      }
+    }
+  }
   
   // This is the main invocation function. After
   // you declare an instance and call that instance
   // as a function, this is what gets run.
-  function pub ( scope, value, meta ) {
+  function pub ( scope, value, meta, opts ) {
 
     // If there are no arguments, and this is useful in the browser
     // debug console, return all the internal data structures.
     if ( arguments.length === 0 ) {
       return {
         data: data, 
-        setters: setterMap, 
         events: eventMap,
         globs: globberMap
       };
@@ -228,60 +276,92 @@ function EvDa (imported) {
         return pub.apply(pub.context, [which].concat(args));
       });
     }
-    if ( arguments.length == 1 ) {
 
-      // The object style invocation will return
-      // handles associated with all the keys that
-      // went in. There *could* be a mix and match
-      // of callbacks and setters, but that would
-      // be fine I guess...
-      if( isObject(scope) ) {
-        var ret = {};
+    // The object style invocation will return
+    // handles associated with all the keys that
+    // went in. There *could* be a mix and match
+    // of callbacks and setters, but that would
+    // be fine I guess...
+    if( isObject(scope) ) {
+      var ret = {};
 
-        // Object style should be executed as a transaction
-        // to avoid ordinals of the keys making a substantial
-        // difference in the existence of the values
-        each( scope, function( _key, _value ) {
-          ret[_key] = pub ( _key, _value, meta, 0, 1 );
-        });
+      //
+      // Object style should be executed as a transaction
+      // to avoid ordinals of the keys making a substantial
+      // difference in the existence of the values.
+      //
+      // Also under an object style assignment passing, the
+      // ordering of the arguments is naturally one off -
+      // excluding the value ... this means that we cascade
+      // down.
+      opts = meta || {};
+      meta = value;
+      opts.noexec = 1;
 
-        // After the callbacks has been bypassed, then we
-        // run all of them a second time, this time the
-        // dependency graphs from the object style transactional
-        // invocation should be satisfied
+      each( scope, function( _key, _value ) {
+        ret[_key] = pub ( _key, _value, meta, opts );
+      });
+
+      // After the callbacks has been bypassed, then we
+      // run all of them a second time, this time the
+      // dependency graphs from the object style transactional
+      // invocation should be satisfied
+      if(!opts.bypass) {
         each( ret, function( _key, _value ) {
           if(isFunction(ret[_key]) && !isFunction(scope[_key])) {
             scope[_key] = ret[_key]();
           }
         });
-
-        // TODO: fix this
-        bubble( keys(ret)[0] );
-
-        return scope;
       }
 
-      return smartMap(scope, function(what) { 
-        return data[ what ];
-      });
+      // TODO: fix this
+      bubble( keys(ret)[0] );
+
+      return scope;
+    }
+
+    // This will return all the handlers associated with
+    // this event.
+    if ( arguments.length == 1 ) {
+      return smartMap(scope, resolve);
     } 
 
     // If there were two arguments and if one of them was a function, then
     // this needs to be registered.  Otherwise, we are setting a value.
-    return pub [ isFunction ( value ) ? ON : 'set' ].apply(this, arguments);
+    //
+    // unless it's an array of functions
+    return pub [ 
+      ( isFunction ( value ) || 
+        ( isArray(value) && isFunction(value[0]) )
+      ) ? ON : 'set' ].apply(this, arguments);
   }
 
   // Register callbacks for
   // test, on, after, and or.
-  each ( [FIRST, ON, AFTER, 'test', 'or'], function ( stage ) {
+  each ( typeList, function ( stage ) {
 
     // register the function
     pub[stage] = function ( key, callback, meta ) {
-      var map = eventMap;
+
+      // if it's an array, then we register each one
+      // individually.
+      if(isArray(callback)) {
+        // take everything after the first two arguments
+        var args = slice.call(arguments, 2);
+        
+        // go through the callback as an array, returning
+        // its list of cbs
+        return map(callback, function(cb) {
+          // call within the oo binding context, the key, the cb,
+          // and the remaining args.
+          return pub[stage].apply(pub.context, [key, cb].concat(args));
+        });
+      }
+
+      var my_map = eventMap;
 
       if ( !callback ) {
-        callback = key;
-        key = BASE;
+        return my_map[stage + key];
       }
 
       // This is the back-reference map to this callback
@@ -289,10 +369,56 @@ function EvDa (imported) {
       (callback.$ || (callback.$ = [])).push ( stage + key );
 
       if (isGlobbed(key)) {
-        map = globberMap;
+        my_map = globberMap;
       }
 
-      (map[stage + key] || (map[stage + key] = [])).push ( callback );
+      (my_map[stage + key] || (my_map[stage + key] = [])).push ( callback );
+
+      //
+      // It would be nice to do something like
+      // ev('key', function()).after(function(){})
+      //
+      // But in order for this to happen you need to proxy the first argument
+      // magically over to a reference set. This isn't that hard actually 
+      // and shouldn't be too expensive (lolz) anyway, a purely prototype-based 
+      // approach would be awesome here but we need to do this functionally so
+      // it's a bit of superfluous code where we cross our fingers and hope nobody
+      // hates us.
+      //
+      each(typeList, function (stage) {
+
+        if (!(stage in callback)) {
+          
+          callback[stage] = function(am_i_a_function) {
+            // the first argument MAY be our key from above
+            var args = slice.call(arguments);
+
+            // If this is a function then we inherit our key
+            if(isFunction(am_i_a_function)) {
+              args = [key].concat(args);
+            } 
+            // However, maybe someone didn't read the documentation closely and is
+            // trying to fuck with us, providing an entirely different set of keys here ...
+            // that bastard.  It's ok, that's what the type-checking was all about. In this
+            // case we just blindly pass everything through
+
+            // Also we want to be clever with the return of the callbacks, since we effectively 
+            // shadow the previous system. As it turns out it doesn't matter how we chain these thing
+            // it just matters what temporal time we register them.  So we make the final callback 
+            // an array like structure.
+            if(! ('len' in callback) ) {
+              // self reference
+              callback[0] = callback;
+              // seed it one past the self-reference minus our incrementer
+              callback.len = 0;
+            }
+            callback.len++;
+            callback[callback.len] = pub[stage].apply(pub.context, args);
+
+            return callback;
+          }
+        }
+      });
 
       return extend(callback, meta);
     }
@@ -349,10 +475,11 @@ function EvDa (imported) {
 
     } 
 
+    var setKey = 'set' + key;
     // If I know how to set this key but
     // I just haven't done it yet, run through
     // that function now.
-    if( setterMap[key] ) {
+    if( eventMap[setKey] ) {
       // If someone explicitly sets the k/v in the setter
       // that is fine, that means this function isn't run.
       //
@@ -361,11 +488,11 @@ function EvDa (imported) {
       // reliably check if the code explicitly set things after the function
       // returns.
       
-      /* var ThisIsWorthless = */ setterMap[key](function(value) {
+      /* var ThisIsWorthless = */ eventMap[setKey](function(value) {
         pub.set.call(pub.context, key, value, meta);
       });
 
-      delete setterMap[key];
+      delete eventMap[setKey];
     }
 
     if ( callback ) {
@@ -429,8 +556,17 @@ function EvDa (imported) {
     list: {},
     isPaused: false,
     db: data,
-    setterMap: setterMap,
-    events: eventMap,
+    events: function(name, type){
+      if(type) {
+        return eventMap[type + name];
+      }
+      if(name) {
+        return smartMap(typeList.concat(['set']), function(type) {
+          return eventMap[type + name];
+        });
+      }
+      return eventMap;
+    },
     del: del,
     whenSet: isset,
     isset: isset,
@@ -476,7 +612,7 @@ function EvDa (imported) {
     // Unlike much of the reset of the code,
     // setters have single functions.
     setter: function ( key, callback ) {
-      setterMap[key] = callback;
+      eventMap['set' + key] = callback;
 
       // If I am setting a setter and
       // a function is already waiting on it,
@@ -487,6 +623,44 @@ function EvDa (imported) {
     },
 
     when: function ( key, toTest, lambda ) {
+      // when multiple things are set in an object style.
+      if ( isObject(key) ) {
+        var 
+          cbMap = {},
+          flagMap = {},
+          // flagTest only gets run when
+          flagReset = function(val, meta) {
+            flagMap[meta.key] = false;
+            meta();
+          }, 
+          flagTest = function(val, meta) {
+            // toggle the flag
+            flagMap[meta.key] = true;
+
+            // see if there's any more false things
+            // and if there are not then we run this
+            if(values(flagMap).indexOf(false) == -1) {
+              toTest.apply(pub.context, slice.call(arguments));
+            }
+          };
+
+        each(key, function(_key, _val) {
+          // we first set up a test that will reset our flag.
+          cbMap[_key + "-test" ] = pub.test(_key, flagReset);
+
+          // then the actual test
+          cbMap[_key] = pub.when(_key, _val, flagTest);
+
+          // set the initial flagmap key
+          // value to false - this will
+          // be triggered if things succeed.
+          // This has to be initialized here.
+          flagMap[_key] = false;
+        });
+
+        return cbMap;
+      }
+
       // See if toTest makes sense as a block of code
       // This may have some drastically unexpected side-effects.
       if ( isString(toTest) ) {
@@ -500,6 +674,8 @@ function EvDa (imported) {
 
           toTest = attempt;
         } catch (ex) { }
+      } else if ( arguments.length == 2 ) {
+        return pub.isset ( key, toTest );
       }
 
       return pub(key, function(value) {
@@ -513,7 +689,7 @@ function EvDa (imported) {
           // Otherwise, try a triple equals.
           ( value === toTest ) 
         ) {
-          lambda.call(pub.context, value);
+          lambda.apply(pub.context, slice.call(arguments));
         }
       });
     },
@@ -525,20 +701,20 @@ function EvDa (imported) {
       }
     },
 
-    incr: function ( key, amount ) {
+    incr: function ( key, amount, meta ) {
       amount = amount || 1;
       // we can't use the same trick here because if we
       // hit 0, it will auto-increment to amount
-      return pub.set ( key, isNumber(data[key]) ? (data[key] + amount) : amount );
+      return pub.set ( key, isNumber(data[key]) ? (data[key] + amount) : amount, meta );
     },
 
-    decr: function ( key, amount ) {
+    decr: function ( key, amount, meta ) {
       amount = amount || 1;
       // if key isn't in data, it returns 0 and sets it
       // if key is in data but isn't a number, it returns NaN and sets it
       // if key is 1, then it gets reduced to 0, getting 0,
       // if key is any other number, than it gets set
-      return pub.set ( key, data[key] - amount || 0 );
+      return pub.set ( key, data[key] - amount || 0, meta );
     },
 
     // If we are pushing and popping a non-array then
@@ -546,17 +722,12 @@ function EvDa (imported) {
     // to the user than we try to be graceful and silent
     // Therein, we don't try to handle input validation
     // and just try it anyway
-    push: function ( key, value ) {
-      if (size(arguments) == 1) {
-        value = key;
-        key = BASE;
-      }
-
-      return pub.set ( key, [].concat(data[key] || [], [value]) );
+    push: function ( key, value, meta ) {
+      return pub.set ( key, [].concat(data[key] || [], [value]), meta );
     },
 
-    pop: function ( key ) {
-      return pub.set ( key || BASE, data[key].slice(0, -1) );
+    pop: function ( key, meta ) {
+      return pub.set ( key, data[key].slice(0, -1), meta );
     },
 
     traceList: [],
@@ -592,8 +763,35 @@ function EvDa (imported) {
       );
     },
 
-    set: function (key, value, _meta, bypass, _noexecute) {
-      if(lockMap[key] > 1) { return data[key]; }
+    count: function(key) {
+      if(arguments.length === 0) {
+        return Math.max.apply(this, values(data_ix));
+      } else {
+        return data_ix[key];
+      }
+    },
+
+    set: function (key, value, _meta, _opts) {
+      _opts = _opts || {};
+
+      var 
+        res,
+        bypass = _opts['bypass'], 
+        coroutine = _opts['coroutine'] || function(){ return true },
+        hasvalue = ('value' in _opts),
+        noexec = _opts['noexec'];
+
+      // this is when we are calling a future setter
+      if(arguments.length == 1) {
+        var ret = function() {
+          pub.set.apply(pub.context, [key].concat(slice.call(arguments)));
+        }
+        pub.set.call(pub.context, key, undefined);
+        return ret;
+      }
+
+      // recursion prevention.
+      if(lockMap[key] > 0) { return data[key]; }
       lockMap[key] = (lockMap[key] || 0) + 1;
 
       var 
@@ -601,9 +799,25 @@ function EvDa (imported) {
         result,
         args = slice.call(arguments),
         times = size(eventMap[ testKey ]),
+
+        // Tests are run sequentially, not
+        // in parallel.
+        testIx = 0,
         doTest = (times && !bypass),
         failure,
 
+        orHandler = function() {
+          // If the tests fail, then this is the alternate failure
+          // path that will be run
+          each ( eventMap[ OR + key ] || [], function ( callback ) {
+            runCallback ( 
+              callback, 
+              pub.context, 
+              hasvalue ? _opts['value'] : meta.value, 
+              meta,
+              meta.meta);
+          });
+        },
         // Invoke will also get done
         // but it will have no semantic
         // meaning, so it's fine.
@@ -613,13 +827,45 @@ function EvDa (imported) {
 
             if ( ! --times ) { 
               if ( failure ) { 
-                each ( eventMap[ "or" + key ] || [], function ( callback ) {
-                  runCallback ( callback, pub.context, value, _meta );
-                });
+                orHandler();
               } else {
-                pub.set ( key, value, _meta, 1 );
+
+                //
+                // The actual setter gets the real value.
+                //
+                // If a "coroutine" is set then this will be
+                // called before the final setter goes through.
+                //
+                if (coroutine(meta, true)) {
+
+                  //
+                  // Since the setter normally wraps the meta through a layer
+                  // of indirection and we have done that already, we need
+                  // to pass the meta this time as the wrapped version.
+                  //
+                  // Otherwise the calling convention of the data getting
+                  // passed through would magically change if a test gets
+                  // placed in the chain.
+                  //
+                  pub.set ( key, meta.value, meta.meta, {bypass: 1} );
+                } else {
+                  orHandler();
+                }
+              }
+            } else {
+              testIx++;
+
+              if (coroutine(meta, false)) {
+                res = eventMap[ testKey ][ testIx ].call ( pub.context, (hasvalue ? _opts['value'] : meta.value), meta, meta.meta );
+
+                if(res === true || res === false) {
+                  meta(res);
+                }
+              } else {
+                orHandler();
               }
             }
+
             return ok;
           }
         ) : {};
@@ -630,14 +876,37 @@ function EvDa (imported) {
         meta: _meta || {},
         done: meta, 
         result: meta,
-        key: key
+        key: key,
+        // the value to set ... or change.
+        value: value
       });
 
       if (doTest) {
-        // This is the test handlers
-        each ( eventMap[ testKey ], function ( callback ) {
-          callback.call ( pub.context, value, meta );
-        });
+        // we permit a level of recursion for testing.
+        lockMap[key]--;
+        if (testLockMap[key] !== true) {
+          testLockMap[key] = true;
+
+          // This is the test handlers
+          if(coroutine(meta, false)) {
+            res = eventMap[ testKey ][ testIx ].call ( 
+              pub.context, 
+              (hasvalue ? _opts['value'] : meta.value), 
+              meta,
+              meta.meta
+            );
+
+            if(res === true || res === false) {
+              meta(res);
+            }
+          } else {
+            orHandler();
+          }
+
+          testLockMap[key] = false;
+        }
+
+        //
         // Don't return the value...
         // return the current value of that key.
         // 
@@ -649,48 +918,94 @@ function EvDa (imported) {
           callback.call ( pub.context, args );
         });
 
-        // Set the key to the new value.
-        // The old value is being passed in
-        // through the meta
-        data[key] = value;
+        // If there's a coroutine then we call that
+        // here
+        if (coroutine(meta, true)) {
 
-        var cback = function(){
-          each(
-            (eventMap[FIRST + key] || []).concat(
-              (eventMap[ON + key] || []),
-              (eventMap[AFTER + key] || []) 
-            ),
-            function(callback) {
-              meta.last = runCallback(callback, pub.context, value, meta);
-            });
-          return value;
-        }
+          value = meta.value;
 
-        if(!_noexecute) {
-          result = cback.call(pub.context);
-        } else {
-          // if we are not executing this, then
-          // we return a set of functions that we
-          // would be executing.
-          result = cback;
+          //
+          // Set the key to the new value.
+          // The old value is being passed in
+          // through the meta
+          //
+          if(!(_opts.onlychange && value === data[key])) {
+
+            if(!_opts.noset) {
+              data[key] = value;
+
+              if(key != '') {
+                data_ix[key] = (data_ix[key] || 0) + 1;
+              }
+            }
+
+            var myargs = arguments, cback = function(){
+              each(
+                (eventMap[FIRST + key] || []).concat(
+                  (eventMap[ON + key] || [])
+                ),
+                function(callback) {
+                  meta.last = runCallback(callback, pub.context, value, meta);
+                });
+
+              // After this, we bubble up if relevant.
+              if(key.length > 0) {
+                // But we don't hit the coroutine
+                delete _opts['coroutine'];
+
+                bubble.apply(pub.context, [key].concat(slice.call(myargs, 2)));
+              }
+
+              each(eventMap[AFTER + key] || [],
+                function(callback) {
+                  meta.last = runCallback(callback, pub.context, value, meta);
+                });
+
+              return value;
+            }
+
+            if(!noexec) {
+              result = cback.call(pub.context);
+            } else {
+              // if we are not executing this, then
+              // we return a set of functions that we
+              // would be executing.
+              result = cback;
+            }
+          }
         }
       } 
 
-      // After this, we bubble up if relevant.
-      if(key.length > 0) {
-        bubble.apply(pub.context, [key].concat(slice.call(arguments, 2)));
-      }
 
       lockMap[key] = 0;
 
       return result;
     },
 
-    fire: function ( key ) {
-      pub.set ( key, data[key] );
+    fire: function ( key, meta ) {
+      each(key, function(what) {
+        pub.set ( what, data[what], meta, {noset: true} );
+      });
     },
 
     once: function ( key, lambda, meta ) {
+       
+      //
+      // Permit once to take a bunch of callbacks and mark
+      // them all for one time.
+      //
+      // if we have a 'smart map' then we actually only care
+      // about the values of it.
+      //
+      if ( isObject(key) ) {
+        key = values(key);
+      }
+      if ( isArray(key) ) {
+        return map(key, function(what) {
+          pub.once.call(pub.context, what, lambda, meta);
+        });
+      }
+
       // If this is a callback, then we can register it to be called once.
       if(lambda) {
         // Through some slight recursion.
@@ -699,6 +1014,7 @@ function EvDa (imported) {
           // Then we call the once with the 
           // handle, returning here
           pub ( key, lambda, meta )
+
           // And running the function below:
         );
       } 
@@ -719,28 +1035,67 @@ function EvDa (imported) {
       return pub.list[listName];
     },
 
-    setadd: function ( key, value ) {
-      value = isArray(value) ? value : [value];
+    // This an M*N cost set-add that preserves list 
+    // ordinality
+    osetadd: function ( key, value, meta ) {
+      var before = data[key] || [];
 
-      var 
-        before = data[key] || [],
-        after = uniq( before.concat(value) );
+      // If we are successfully adding to the set
+      // then we run the events associated with it.
+      return pub ( key, value, meta, {
+        coroutine: function(meta, isFinal) {
+          var valArray = isArray(meta.value) ? meta.value : [meta.value];
 
-      if ( before.length != after.length) {
-        return pub ( key, after );
-      }
+          meta.set = clone(before);
 
-      return after;
+          each(valArray, function(what) {
+            if(meta.set.indexOf(what) == -1) {
+              meta.set.push(what);
+            }
+          });
+
+          if(isFinal) {
+            meta.value = meta.set; 
+          }
+
+          return (before.length != meta.set.length);
+        }
+      });
     },
 
-    setdel: function ( key, value ) {
+    // This is a sort + M complexity version that
+    // doesn't perserve ordinality.
+    setadd: function ( key, value, meta ) {
+      var before = data[key] || [], v = 0;
+
+      return pub( key, value, meta, {
+        // this is only called if the tests pass
+        coroutine: function(meta, isFinal) {
+          var valArray = isArray(meta.value) ? meta.value : [meta.value];
+          meta.set = uniq( before.concat(valArray) );
+
+          if(isFinal) {
+            meta.value = meta.set; 
+          }
+
+          return (before.length != meta.set.length);
+        }
+      });
+    },
+
+    settoggle: function ( key, value, meta ) {
+      var routine = ((data[key] || []).indexOf(value) === -1) ? 'add' : 'del';
+      return pub['set' + routine](key, value, meta);
+    },
+
+    setdel: function ( key, value, meta ) {
 
       var
         before = data[key] || [],
         after = without( before, value);
 
       if ( before.length != after.length) {
-        return pub ( key, after );
+        return pub ( key, after, meta, {value: value} );
       }
 
       return after;
@@ -758,8 +1113,30 @@ function EvDa (imported) {
       var bool = true;
       each(arguments, function(which) {
         bool &= (which in data);
+
+        // This bubbling is totally slow but it works
+        var 
+          parts = which.split('.'), 
+          key = '', 
+          len = parts.length,
+          last = parts[len - 1],
+          ix, iy, 
+          ref;
+
+        for(ix = 0; ix < len; ix++) {
+          key = parts.slice(0, ix).join('.');
+          ref = data[key];
+          if(ref) {
+            for(iy = ix; iy < (len - 1); iy++) {
+              ref = ref[parts[iy]];
+            }
+            delete ref[last];
+          }
+        }
+
         delete data[which];
       });
+
       return bool;
     },
 
@@ -770,11 +1147,6 @@ function EvDa (imported) {
     },
 
     changed: function(key, callback) {
-      if( !callback ) {
-        callback = key;
-        key = BASE;
-      }
-
       return pub.on(key, function(value, meta) {
         var 
           newlen = size(value),
@@ -828,6 +1200,8 @@ function EvDa (imported) {
   });
 
   pub.setAdd = pub.setadd;
+  pub.setToggle = pub.settoggle;
+  pub.osetAdd = pub.osetadd;
   pub.setDel = pub.setdel;
   pub.isSet = pub.isset;
 
@@ -836,5 +1210,12 @@ function EvDa (imported) {
   pub.add = pub.push;
 
   pub.isArray = isArray;
+
+  // After all the mechanisms are set up, then and only then do
+  // we do the import
+  if(arguments.length > 0) {
+    pub(imported);
+  }
+
   return pub;
 }
