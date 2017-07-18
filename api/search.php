@@ -2,7 +2,7 @@
 require('common.php');
 $fieldList = ['id', 'convo_id', 'timestamp', 'from_dispname', 'body_xml', 'chatmsg_type', 'identities'];
 
-$limit = (empty($_GET['limit'])) ? 1000 : mysql_real_escape_string($_GET['limit']);
+$limit = (empty($_GET['limit'])) ? 1000 : SQLite3::escapeString($_GET['limit']);
 
 // That which we return
 $res = Array(
@@ -31,11 +31,11 @@ if(
   } 
 
   if(!empty($_GET['rooms'])) {
-    $findList[] = "convo_id in (" . mysql_real_escape_string(implode(',', $_GET['rooms'])) . ")";
+    $findList[] = "convo_id in (" . SQLite3::escapeString(implode(',', $_GET['rooms'])) . ")";
   } 
 
   if(!empty($_GET['notRooms'])) {
-    $findList[] = "convo_id not in (" . mysql_real_escape_string(implode(',', $_GET['notRooms'])) . ")";
+    $findList[] = "convo_id not in (" . SQLite3::escapeString(implode(',', $_GET['notRooms'])) . ")";
   } 
 
   if(!empty($_GET['users'])) {
